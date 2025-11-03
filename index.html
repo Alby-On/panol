@@ -14,7 +14,7 @@
       border-radius: 10px;
       box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
   }
-  input, button {
+  input, button, select {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -54,8 +54,21 @@
 <!-- REGISTRO -->
 <div id="registerpage" class="pantalla">
     <h2>Registro de Usuario</h2>
+
     <input id="regNombre" type="text" placeholder="Nombre completo">
-    <input id="regCarrera" type="text" placeholder="Carrera">
+
+    <select id="regCarrera">
+        <option value="">Seleccione su carrera</option>
+        <option>Ingeniería Eléctrica</option>
+        <option>Técnico de nivel superior en Electricidad Industrial</option>
+        <option>Ingeniería en Automatización y Robótica</option>
+        <option>Técnico de nivel superior en Automatización y Robótica</option>
+        <option>Ingeniería en Mecatrónica</option>
+        <option>Técnico de nivel superior en Mecatrónica</option>
+        <option>Área Mecánica</option>
+        <option>Otras Áreas</option>
+    </select>
+
     <input id="regTelefono" type="text" placeholder="Teléfono (+56912345678)">
     <input id="regEmail" type="email" placeholder="Correo">
     <input id="regPass" type="password" placeholder="Contraseña">
@@ -91,7 +104,6 @@
       document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
       document.getElementById(id).style.display = "block";
   }
-
   function mostrarLogin() { mostrar("loginpage"); }
   function mostrarRegistro() { mostrar("registerpage"); }
   function volver() { mostrar("welcomepage"); }
@@ -148,7 +160,7 @@
       mostrar("welcomepage");
   }
 
-  // Manejo de solicitudes
+  // Solicitudes
   function enviarSolicitud() {
       const material = document.getElementById("material").value.trim();
       const cantidad = document.getElementById("cantidad").value.trim();
@@ -200,6 +212,7 @@
 
 </body>
 </html>
+
 
 
 
