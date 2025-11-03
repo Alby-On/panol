@@ -6,8 +6,6 @@
 
 <!-- Firebase Core -->
 <script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js"></script>
-
-<!-- Firebase Auth -->
 <script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js"></script>
 
 <style>
@@ -15,39 +13,60 @@
         font-family: Arial, sans-serif;
         max-width: 400px;
         margin: 20px auto;
+        text-align: center;
     }
-    input, button, select {
+    input, button {
         width: 100%;
         padding: 10px;
         margin: 8px 0;
     }
-    #formSolicitar {
+    .pantalla {
         display: none;
-        border-top: 2px solid #ccc;
-        margin-top: 20px;
-        padding-top: 20px;
     }
 </style>
 </head>
 <body>
 
-<h2>Registro de Usuario</h2>
+<!-- ================================ -->
+<!-- PANTALLA DE BIENVENIDA -->
+<!-- ================================ -->
+<div id="welcomepage" class="pantalla">
+    <h2>Bienvenido al Sistema de Solicitud de Materiales</h2>
+    <p>Esta plataforma permite a los alumnos y docentes solicitar materiales e insumos del pañol.</p>
+    <button onclick="mostrarLogin()">Iniciar Sesión</button>
+    <button onclick="mostrarRegistro()">Registrarse</button>
+</div>
 
-<input id="regEmail" type="email" placeholder="Correo">
-<input id="regPass" type="password" placeholder="Contraseña">
-<button onclick="registrar()">Registrarse</button>
+<!-- ================================ -->
+<!-- PANTALLA DE REGISTRO -->
+<!-- ================================ -->
+<div id="registerpage" class="pantalla">
+    <h2>Registro de Usuario</h2>
 
-<hr>
+    <input id="regEmail" type="email" placeholder="Correo">
+    <input id="regPass" type="password" placeholder="Contraseña">
 
-<h2>Iniciar Sesión</h2>
+    <button onclick="registrar()">Registrarse</button>
+    <button onclick="volver()">Volver</button>
+</div>
 
-<input id="logEmail" type="email" placeholder="Correo">
-<input id="logPass" type="password" placeholder="Contraseña">
-<button onclick="login()">Entrar</button>
+<!-- ================================ -->
+<!-- PANTALLA DE LOGIN -->
+<!-- ================================ -->
+<div id="loginpage" class="pantalla">
+    <h2>Iniciar Sesión</h2>
 
-<hr>
+    <input id="logEmail" type="email" placeholder="Correo">
+    <input id="logPass" type="password" placeholder="Contraseña">
 
-<div id="formSolicitar">
+    <button onclick="login()">Entrar</button>
+    <button onclick="volver()">Volver</button>
+</div>
+
+<!-- ================================ -->
+<!-- PANTALLA FORMULARIO -->
+<!-- ================================ -->
+<div id="formpage" class="pantalla">
     <h2>Solicitud de Material</h2>
 
     <input id="material" placeholder="Material solicitado">
@@ -75,10 +94,20 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // ==============================
-  // URL DEL WEBHOOK (Apps Script)
-  // ==============================
+  // Webhook Apps Script
   const URL_WEBHOOK = "https://script.google.com/macros/s/AKfycbxrAU2a4XsdV-XrY1BFJOACd251fpPxVSQNrZWtm7_Qzp6nPnGytzg4JRgGXIJ1AlFUcA/exec";
+
+  // ==============================
+  // MANEJO DE PANTALLAS
+  // ==============================
+  function mostrar(id) {
+      document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
+      document.getElementById(id).style.display = "block";
+  }
+
+  function mostrarLogin() { mostrar("loginpage"); }
+  function mostrarRegistro() { mostrar("registerpage"); }
+  function volver() { mostrar("welcomepage"); }
 
   // ==============================
   // REGISTRO
@@ -88,7 +117,10 @@
       const pass = document.getElementById("regPass").value;
 
       auth.createUserWithEmailAndPassword(email, pass)
-      .then(() => alert("✅ Usuario registrado"))
+      .then(() => {
+          alert("✅ Usuario registrado");
+          mostrar("loginpage");
+      })
       .catch(error => alert("Error: " + error.message));
   }
 
@@ -101,8 +133,7 @@
 
       auth.signInWithEmailAndPassword(email, pass)
       .then(() => {
-          alert("✅ Sesión iniciada");
-          document.getElementById("formSolicitar").style.display = "block";
+          mostrar("formpage");
       })
       .catch(error => alert("Error: " + error.message));
   }
@@ -131,11 +162,8 @@
       })
       .then(res => res.json())
       .then(resp => {
-          if (resp.ok) {
-              alert("✅ Solicitud enviada correctamente");
-          } else {
-              alert("❌ Error al enviar");
-          }
+          if (resp.ok) alert("✅ Solicitud enviada");
+          else alert("❌ Error al enviar");
       });
   }
 
@@ -144,11 +172,19 @@
   // ==============================
   function cerrarSesion() {
       auth.signOut().then(() => {
-          alert("Sesión cerrada");
-          document.getElementById("formSolicitar").style.display = "none";
+          mostrar("welcomepage");
       });
   }
+
+  // ==============================
+  // INICIO AUTOMÁTICO SEGÚN SESIÓN
+  // ==============================
+  auth.onAuthStateChanged(user => {
+      if (user) mostrar("formpage");
+      else mostrar("welcomepage");
+  });
 </script>
 
 </body>
 </html>
+
