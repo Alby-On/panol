@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <title>Web Pañol</title>
 
-<!-- Firebase Core -->
+<!-- Firebase clásico -->
 <script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js"></script>
 
 <style>
     body {
@@ -42,10 +43,8 @@
 <!-- ================================ -->
 <div id="registerpage" class="pantalla">
     <h2>Registro de Usuario</h2>
-
     <input id="regEmail" type="email" placeholder="Correo">
     <input id="regPass" type="password" placeholder="Contraseña">
-
     <button onclick="registrar()">Registrarse</button>
     <button onclick="volver()">Volver</button>
 </div>
@@ -55,10 +54,8 @@
 <!-- ================================ -->
 <div id="loginpage" class="pantalla">
     <h2>Iniciar Sesión</h2>
-
     <input id="logEmail" type="email" placeholder="Correo">
     <input id="logPass" type="password" placeholder="Contraseña">
-
     <button onclick="login()">Entrar</button>
     <button onclick="volver()">Volver</button>
 </div>
@@ -68,11 +65,9 @@
 <!-- ================================ -->
 <div id="formpage" class="pantalla">
     <h2>Solicitud de Material</h2>
-
     <input id="material" placeholder="Material solicitado">
     <input id="cantidad" type="number" placeholder="Cantidad">
     <input id="comentario" placeholder="Comentario">
-
     <button onclick="enviarSolicitud()">Enviar Solicitud</button>
     <button onclick="cerrarSesion()">Cerrar Sesión</button>
 </div>
@@ -91,8 +86,10 @@
     measurementId: "G-7Y5ES1TL4K"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  // Inicialización Firebase
+  const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const analytics = firebase.analytics();
 
   // Webhook Apps Script
   const URL_WEBHOOK = "https://script.google.com/macros/s/AKfycbxrAU2a4XsdV-XrY1BFJOACd251fpPxVSQNrZWtm7_Qzp6nPnGytzg4JRgGXIJ1AlFUcA/exec";
@@ -183,6 +180,7 @@
       if (user) mostrar("formpage");
       else mostrar("welcomepage");
   });
+
 </script>
 
 </body>
