@@ -3,27 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <title>Web Pañol</title>
-
-<!-- Firebase clásico -->
-<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js"></script>
-
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        max-width: 400px;
-        margin: 20px auto;
-        text-align: center;
-    }
-    input, button {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-    }
-    .pantalla {
-        display: none;
-    }
+  body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 20px auto;
+      text-align: center;
+      background-color: #f0f2f5;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+  }
+  input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+  }
+  button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+  }
+  button:hover {
+      background-color: #0056b3;
+  }
+  .pantalla {
+      display: none;
+  }
+  h2 {
+      color: #333;
+  }
+  ul {
+      text-align: left;
+  }
 </style>
 </head>
 <body>
@@ -36,7 +51,7 @@
     <button onclick="mostrarRegistro()">Registrarse</button>
 </div>
 
-<!-- PANTALLA DE REGISTRO -->
+<!-- REGISTRO -->
 <div id="registerpage" class="pantalla">
     <h2>Registro de Usuario</h2>
     <input id="regEmail" type="email" placeholder="Correo">
@@ -45,7 +60,7 @@
     <button onclick="volver()">Volver</button>
 </div>
 
-<!-- PANTALLA DE LOGIN -->
+<!-- LOGIN -->
 <div id="loginpage" class="pantalla">
     <h2>Iniciar Sesión</h2>
     <input id="logEmail" type="email" placeholder="Correo">
@@ -54,7 +69,7 @@
     <button onclick="volver()">Volver</button>
 </div>
 
-<!-- PANTALLA FORMULARIO -->
+<!-- FORMULARIO -->
 <div id="formpage" class="pantalla">
     <h2>Solicitud de Material</h2>
     <input id="material" placeholder="Material solicitado">
@@ -62,29 +77,13 @@
     <input id="comentario" placeholder="Comentario">
     <button onclick="enviarSolicitud()">Enviar Solicitud</button>
     <button onclick="cerrarSesion()">Cerrar Sesión</button>
+
+    <h3>Solicitudes Pendientes</h3>
+    <ul id="solicitudesList"></ul>
 </div>
 
 <script>
-  // CONFIGURACIÓN DE FIREBASE
-  const firebaseConfig = {
-    apiKey: "AIzaSyB7mWWuXjjtJzYpkduBe1ynmEwjngrztZ0",
-    authDomain: "webpanol.firebaseapp.com",
-    projectId: "webpanol",
-    storageBucket: "webpanol.firebasestorage.app",
-    messagingSenderId: "1031518836569",
-    appId: "1:1031518836569:web:7d20fa2a0c6894d1139e48",
-    measurementId: "G-7Y5ES1TL4K"
-  };
-
-  // Inicialización Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const analytics = firebase.analytics();
-
-  // URL de tu Google Apps Script
-  const URL_WEBHOOK = "https://script.google.com/macros/s/AKfycbxrAU2a4XsdV-XrY1BFJOACd251fpPxVSQNrZWtm7_Qzp6nPnGytzg4JRgGXIJ1AlFUcA/exec";
-
-  // MANEJO DE PANTALLAS
+  // Manejo de pantallas
   function mostrar(id) {
       document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
       document.getElementById(id).style.display = "block";
@@ -94,74 +93,85 @@
   function mostrarRegistro() { mostrar("registerpage"); }
   function volver() { mostrar("welcomepage"); }
 
-  // REGISTRO
+  // Manejo de usuarios en localStorage
   function registrar() {
       const email = document.getElementById("regEmail").value;
       const pass = document.getElementById("regPass").value;
+      if(!email || !pass) { alert("Complete todos los campos"); return; }
 
-      auth.createUserWithEmailAndPassword(email, pass)
-      .then(() => {
-          alert("✅ Usuario registrado");
-          mostrar("loginpage");
-      })
-      .catch(error => alert("Error: " + error.message));
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      if(users.find(u => u.email === email)) { alert("Usuario ya existe"); return; }
+
+      users.push({email, pass});
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Usuario registrado ✅");
+      mostrarLogin();
   }
 
-  // LOGIN
   function login() {
       const email = document.getElementById("logEmail").value;
       const pass = document.getElementById("logPass").value;
-
-      auth.signInWithEmailAndPassword(email, pass)
-      .then(() => {
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      let user = users.find(u => u.email === email && u.pass === pass);
+      if(user) {
+          localStorage.setItem("currentUser", email);
           mostrar("formpage");
-      })
-      .catch(error => alert("Error: " + error.message));
-  }
-
-  // ENVIAR SOLICITUD
-  function enviarSolicitud() {
-      const user = auth.currentUser;
-      if (!user) {
-          alert("Debes iniciar sesión");
-          return;
+          mostrarSolicitudes();
+      } else {
+          alert("Correo o contraseña incorrectos");
       }
-
-      const data = {
-          uid: user.uid,
-          nombre: user.email,
-          material: document.getElementById("material").value,
-          cantidad: document.getElementById("cantidad").value,
-          comentario: document.getElementById("comentario").value
-      };
-
-      fetch(URL_WEBHOOK, {
-          method: "POST",
-          body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(resp => {
-          if (resp.ok) alert("✅ Solicitud enviada");
-          else alert("❌ Error al enviar");
-      });
   }
 
-  // CERRAR SESIÓN
   function cerrarSesion() {
-      auth.signOut().then(() => {
-          mostrar("welcomepage");
+      localStorage.removeItem("currentUser");
+      mostrar("welcomepage");
+  }
+
+  // Manejo de solicitudes en localStorage
+  function enviarSolicitud() {
+      const material = document.getElementById("material").value;
+      const cantidad = document.getElementById("cantidad").value;
+      const comentario = document.getElementById("comentario").value;
+      const usuario = localStorage.getItem("currentUser");
+
+      if(!material || !cantidad) { alert("Complete los campos"); return; }
+
+      let solicitudes = JSON.parse(localStorage.getItem("solicitudes") || "[]");
+      solicitudes.push({usuario, material, cantidad, comentario, estado:"Pendiente"});
+      localStorage.setItem("solicitudes", JSON.stringify(solicitudes));
+      alert("Solicitud enviada ✅");
+      document.getElementById("material").value = "";
+      document.getElementById("cantidad").value = "";
+      document.getElementById("comentario").value = "";
+      mostrarSolicitudes();
+  }
+
+  function mostrarSolicitudes() {
+      const usuario = localStorage.getItem("currentUser");
+      const solicitudes = JSON.parse(localStorage.getItem("solicitudes") || "[]")
+                                .filter(s => s.usuario === usuario);
+      const list = document.getElementById("solicitudesList");
+      list.innerHTML = "";
+      solicitudes.forEach(s => {
+          const li = document.createElement("li");
+          li.textContent = `${s.material} - Cantidad: ${s.cantidad} - ${s.comentario} - Estado: ${s.estado}`;
+          list.appendChild(li);
       });
   }
 
-  // INICIO AUTOMÁTICO SEGÚN SESIÓN
-  auth.onAuthStateChanged(user => {
-      if (user) mostrar("formpage");
-      else mostrar("welcomepage");
-  });
+  // Inicio automático
+  if(localStorage.getItem("currentUser")) {
+      mostrar("formpage");
+      mostrarSolicitudes();
+  } else {
+      mostrar("welcomepage");
+  }
 </script>
 
 </body>
 </html>
+
+
 
 
 
