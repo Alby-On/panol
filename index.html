@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Web Pañol</title>
+
+<!-- Firebase Core -->
+<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js"></script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 400px;
+        margin: 20px auto;
+        text-align: center;
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+    }
+    .pantalla {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<!-- ================================ -->
+<!-- PANTALLA DE BIENVENIDA -->
+<!-- ================================ -->
+<div id="welcomepage" class="pantalla">
+    <h2>Bienvenido al Sistema de Solicitud de Materiales</h2>
+    <p>Esta plataforma permite a los alumnos y docentes solicitar materiales e insumos del pañol.</p>
+    <button onclick="mostrarLogin()">Iniciar Sesión</button>
+    <button onclick="mostrarRegistro()">Registrarse</button>
+</div>
+
+<!-- ================================ -->
+<!-- PANTALLA DE REGISTRO -->
+<!-- ================================ -->
+<div id="registerpage" class="pantalla">
+    <h2>Registro de Usuario</h2>
+
+    <input id="regEmail" type="email" placeholder="Correo">
+    <input id="regPass" type="password" placeholder="Contraseña">
+
+    <button onclick="registrar()">Registrarse</button>
+    <button onclick="volver()">Volver</button>
+</div>
+
+<!-- ================================ -->
+<!-- PANTALLA DE LOGIN -->
+<!-- ================================ -->
+<div id="loginpage" class="pantalla">
+    <h2>Iniciar Sesión</h2>
+
+    <input id="logEmail" type="email" placeholder="Correo">
+    <input id="logPass" type="password" placeholder="Contraseña">
+
+    <button onclick="login()">Entrar</button>
+    <button onclick="volver()">Volver</button>
+</div>
+
+<!-- ================================ -->
+<!-- PANTALLA FORMULARIO -->
+<!-- ================================ -->
+<div id="formpage" class="pantalla">
+    <h2>Solicitud de Material</h2>
+
+    <input id="material" placeholder="Material solicitado">
+    <input id="cantidad" type="number" placeholder="Cantidad">
+    <input id="comentario" placeholder="Comentario">
+
+    <button onclick="enviarSolicitud()">Enviar Solicitud</button>
+    <button onclick="cerrarSesion()">Cerrar Sesión</button>
+</div>
+
+<script>
+  // ==============================
+  // CONFIGURACIÓN DE FIREBASE
+  // ==============================
+  const firebaseConfig = {
+    apiKey: "AIzaSyB7mWWuXjjtJzYpkduBe1ynmEwjngrztZ0",
+    authDomain: "webpanol.firebaseapp.com",
+    projectId: "webpanol",
+    storageBucket: "webpanol.firebasestorage.app",
+    messagingSenderId: "1031518836569",
+    appId: "1:1031518836569:web:7d20fa2a0c6894d1139e48",
+    measurementId: "G-7Y5ES1TL4K"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // Webhook Apps Script
+  const URL_WEBHOOK = "https://script.google.com/macros/s/AKfycbxrAU2a4XsdV-XrY1BFJOACd251fpPxVSQNrZWtm7_Qzp6nPnGytzg4JRgGXIJ1AlFUcA/exec";
+
+  // ==============================
+  // MANEJO DE PANTALLAS
+  // ==============================
+  function mostrar(id) {
+      document.querySelectorAll(".pantalla").forEach(p => p.style.display = "none");
+      document.getElementById(id).style.display = "block";
+  }
+
+  function mostrarLogin() { mostrar("loginpage"); }
+  function mostrarRegistro() { mostrar("registerpage"); }
+  function volver() { mostrar("welcomepage"); }
+
+  // ==============================
+  // REGISTRO
+  // ==============================
+  function registrar() {
+      const email = document.getElementById("regEmail").value;
+      const pass = document.getElementById("regPass").value;
+
+      auth.createUserWithEmailAndPassword(email, pass)
+      .then(() => {
+          alert("✅ Usuario registrado");
+          mostrar("loginpage");
+      })
+      .catch(error => alert("Error: " + error.message));
+  }
+
+  // ==============================
+  // LOGIN
+  // ==============================
+  function login() {
+      const email = document.getElementById("logEmail").value;
+      const pass = document.getElementById("logPass").value;
+
+      auth.signInWithEmailAndPassword(email, pass)
+      .then(() => {
+          mostrar("formpage");
+      })
+      .catch(error => alert("Error: " + error.message));
+  }
+
+  // ==============================
+  // ENVIAR SOLICITUD
+  // ==============================
+  function enviarSolicitud() {
+      const user = auth.currentUser;
+      if (!user) {
+          alert("Debes iniciar sesión");
+          return;
+      }
+
+      const data = {
+          uid: user.uid,
+          nombre: user.email,
+          material: document.getElementById("material").value,
+          cantidad: document.getElementById("cantidad").value,
+          comentario: document.getElementById("comentario").value
+      };
+
+      fetch(URL_WEBHOOK, {
+          method: "POST",
+          body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(resp => {
+          if (resp.ok) alert("✅ Solicitud enviada");
+          else alert("❌ Error al enviar");
+      });
+  }
+
+  // ==============================
+  // CERRAR SESIÓN
+  // ==============================
+  function cerrarSesion() {
+      auth.signOut().then(() => {
+          mostrar("welcomepage");
+      });
+  }
+
+  // ==============================
+  // INICIO AUTOMÁTICO SEGÚN SESIÓN
+  // ==============================
+  auth.onAuthStateChanged(user => {
+      if (user) mostrar("formpage");
+      else mostrar("welcomepage");
+  });
+</script>
+
+</body>
+</html>
+
