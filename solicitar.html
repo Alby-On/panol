@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitar Materiales</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        .box {
+            background: white; padding: 20px; max-width: 450px;
+            margin: auto; border-radius: 10px; box-shadow: 0 0 10px #ccc;
+        }
+        input {
+            width: 100%; padding: 10px; margin: 5px 0 10px;
+            border-radius: 5px; border: 1px solid #aaa;
+        }
+        .fila {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+        button {
+            width: 100%; background: #007bff; color: white; padding: 12px;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+        button:hover { background: #0056b3; }
+        .btnEliminar {
+            background: #dc3545;
+            margin-top: 5px;
+        }
+        .btnEliminar:hover {
+            background: #c82333;
+        }
+        .btnAgregar {
+            background: #28a745;
+        }
+        .btnAgregar:hover {
+            background: #218838;
+        }
+        .btnVolver {
+            background: #6c757d;
+        }
+        .btnVolver:hover {
+            background: #565e64;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Solicitar Materiales</h2>
+
+    <div id="contenedor">
+        <!-- FILA INICIAL -->
+        <div class="fila">
+            <input type="text" placeholder="Nombre del material o equipo" class="inputNombre">
+            <input type="number" min="1" placeholder="Cantidad" class="inputCantidad">
+            <button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button>
+        </div>
+    </div>
+
+    <button class="btnAgregar" onclick="agregarFila()">Agregar otro material</button>
+    <button onclick="enviarSolicitud()">Enviar Solicitud</button>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+</div>
+
+<script>
+function agregarFila() {
+    const contenedor = document.getElementById("contenedor");
+
+    const nuevaFila = document.createElement("div");
+    nuevaFila.className = "fila";
+
+    nuevaFila.innerHTML = `
+        <input type="text" placeholder="Nombre del material o equipo" class="inputNombre">
+        <input type="number" min="1" placeholder="Cantidad" class="inputCantidad">
+        <button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button>
+    `;
+
+    contenedor.appendChild(nuevaFila);
+}
+
+function eliminarFila(boton) {
+    const fila = boton.parentNode;
+    const contenedor = document.getElementById("contenedor");
+
+    if (contenedor.children.length > 1) {
+        fila.remove();
+    } else {
+        alert("Debe haber al menos un material.");
+    }
+}
+
+function enviarSolicitud() {
+    const nombres = document.querySelectorAll(".inputNombre");
+    const cantidades = document.querySelectorAll(".inputCantidad");
+
+    let items = [];
+
+    for (let i = 0; i < nombres.length; i++) {
+        const nombre = nombres[i].value.trim();
+        const cantidad = cantidades[i].value.trim();
+
+        if (!nombre || !cantidad) {
+            alert("Complete todos los campos antes de enviar.");
+            return;
+        }
+
+        items.push({ nombre, cantidad });
+    }
+
+    console.log("Solicitud enviada (demo):", items);
+    alert("Solicitud enviada correctamente (versión demo).");
+
+    // FASE 2: aquí la guardaremos en base de datos
+}
+</script>
+
+</body>
+</html>
