@@ -4,48 +4,82 @@
     <meta charset="UTF-8">
     <title>Solicitar Materiales</title>
     <style>
-        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+        }
         .box {
-            background: white; padding: 20px; max-width: 450px;
-            margin: auto; border-radius: 10px; box-shadow: 0 0 10px #ccc;
+            background: white;
+            padding: 20px;
+            max-width: 650px;
+            margin: auto;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
-        input {
-            width: 100%; padding: 10px; margin: 5px 0 10px;
-            border-radius: 5px; border: 1px solid #aaa;
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .fila {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-bottom: 15px;
-            background: #fafafa;
         }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+
         button {
-            width: 100%; background: #007bff; color: white; padding: 12px;
-            border: none; border-radius: 5px; cursor: pointer;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
             font-size: 15px;
-            margin-top: 10px;
+            cursor: pointer;
         }
-        button:hover { background: #0056b3; }
-        .btnEliminar {
-            background: #dc3545;
-            margin-top: 5px;
-        }
-        .btnEliminar:hover {
-            background: #c82333;
-        }
+
         .btnAgregar {
             background: #28a745;
+            margin-bottom: 15px;
         }
-        .btnAgregar:hover {
-            background: #218838;
+        .btnAgregar:hover { background: #218838; }
+
+        .btnEnviar {
+            background: #007bff;
+            width: 100%;
         }
+        .btnEnviar:hover { background: #0056b3; }
+
         .btnVolver {
             background: #6c757d;
+            width: 100%;
+            margin-top: 8px;
         }
-        .btnVolver:hover {
-            background: #565e64;
+        .btnVolver:hover { background: #565e64; }
+
+        .btnEliminar {
+            background: #dc3545;
+            padding: 8px;
+            font-size: 14px;
         }
+        .btnEliminar:hover { background: #c82333; }
     </style>
 </head>
 <body>
@@ -53,41 +87,49 @@
 <div class="box">
     <h2>Solicitar Materiales</h2>
 
-    <div id="contenedor">
-        <!-- FILA INICIAL -->
-        <div class="fila">
-            <input type="text" placeholder="Nombre del material o equipo" class="inputNombre">
-            <input type="number" min="1" placeholder="Cantidad" class="inputCantidad">
-            <button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button>
-        </div>
-    </div>
+    <button class="btnAgregar" onclick="agregarFila()">+ Agregar Material</button>
 
-    <button class="btnAgregar" onclick="agregarFila()">Agregar otro material</button>
-    <button onclick="enviarSolicitud()">Enviar Solicitud</button>
+    <table id="tablaMateriales">
+        <thead>
+            <tr>
+                <th>Material o Equipo</th>
+                <th style="width:120px;">Cantidad</th>
+                <th style="width:100px;">Acción</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+            <tr>
+                <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
+                <td><input type="number" min="1" value="1" class="inputCantidad"></td>
+                <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btnEnviar" onclick="enviarSolicitud()">Enviar Solicitud</button>
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
 function agregarFila() {
-    const contenedor = document.getElementById("contenedor");
+    const cuerpo = document.getElementById("cuerpoTabla");
 
-    const nuevaFila = document.createElement("div");
-    nuevaFila.className = "fila";
+    const fila = document.createElement("tr");
 
-    nuevaFila.innerHTML = `
-        <input type="text" placeholder="Nombre del material o equipo" class="inputNombre">
-        <input type="number" min="1" placeholder="Cantidad" class="inputCantidad">
-        <button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button>
+    fila.innerHTML = `
+        <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
+        <td><input type="number" min="1" value="1" class="inputCantidad"></td>
+        <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
     `;
 
-    contenedor.appendChild(nuevaFila);
+    cuerpo.appendChild(fila);
 }
 
 function eliminarFila(boton) {
-    const fila = boton.parentNode;
-    const contenedor = document.getElementById("contenedor");
+    const fila = boton.parentNode.parentNode;
+    const cuerpo = document.getElementById("cuerpoTabla");
 
-    if (contenedor.children.length > 1) {
+    if (cuerpo.rows.length > 1) {
         fila.remove();
     } else {
         alert("Debe haber al menos un material.");
@@ -98,26 +140,28 @@ function enviarSolicitud() {
     const nombres = document.querySelectorAll(".inputNombre");
     const cantidades = document.querySelectorAll(".inputCantidad");
 
-    let items = [];
+    let materiales = [];
 
     for (let i = 0; i < nombres.length; i++) {
         const nombre = nombres[i].value.trim();
         const cantidad = cantidades[i].value.trim();
 
         if (!nombre || !cantidad) {
-            alert("Complete todos los campos antes de enviar.");
+            alert("Todos los campos deben estar completos.");
             return;
         }
 
-        items.push({ nombre, cantidad });
+        materiales.push({ nombre, cantidad });
     }
 
-    console.log("Solicitud enviada (demo):", items);
+    console.log("Solicitud enviada (demo):", materiales);
+
     alert("Solicitud enviada correctamente (versión demo).");
 
-    // FASE 2: aquí la guardaremos en base de datos
+    // FASE 2: Aquí guardaremos la solicitud real
 }
 </script>
 
 </body>
 </html>
+
