@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Menú Principal</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        .box {
+            background: white; padding: 20px; max-width: 400px;
+            margin: auto; border-radius: 10px; box-shadow: 0 0 10px #ccc;
+        }
+        .perfil {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        button {
+            width: 100%; background: #28a745; color: white; padding: 12px;
+            border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;
+            font-size: 16px;
+        }
+        button:hover { background: #1e7e34; }
+        .logout { background: #dc3545 !important; }
+        .logout:hover { background: #c82333 !important; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Menú Principal</h2>
+
+    <!-- PERFIL DEL USUARIO (Fase 2 se llena dinámicamente) -->
+    <div class="perfil">
+        <p><b>Nombre:</b> <span id="pNombre">(nombre)</span></p>
+        <p><b>RUT:</b> <span id="pRut">(rut)</span></p>
+        <p><b>Carrera:</b> <span id="pCarrera">(carrera)</span></p>
+        <p><b>Teléfono:</b> <span id="pTelefono">(telefono)</span></p>
+        <p><b>Correo:</b> <span id="pCorreo">(correo)</span></p>
+    </div>
+
+    <button onclick="location.href='solicitar.html'">Solicitar Materiales</button>
+    <button onclick="location.href='pendientes.html'">Entregas Pendientes</button>
+    <button class="logout" onclick="location.href='index.html'">Cerrar Sesión</button>
+</div>
+
+<script>
+// FASE 1: Solo muestra valores estáticos
+// FASE 2: Aquí pondremos la carga real de datos del usuario guardados
+
+document.getElementById("pNombre").textContent = "(demo)";
+document.getElementById("pRut").textContent = "(demo)";
+document.getElementById("pCarrera").textContent = "(demo)";
+document.getElementById("pTelefono").textContent = "(demo)";
+document.getElementById("pCorreo").textContent = "(demo)";
+</script>
+
+</body>
+</html>
