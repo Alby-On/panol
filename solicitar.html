@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Solicitar Materiales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #f0f2f5;
-            padding: 20px;
+            padding: 10px;
         }
         .box {
             background: white;
@@ -24,14 +25,17 @@
 
         label {
             font-weight: bold;
+            margin-top: 10px;
+            display: block;
         }
 
-        select, input[type="text"] {
+        select, input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
             border-radius: 6px;
             border: 1px solid #aaa;
+            font-size: 16px;
         }
 
         table {
@@ -39,23 +43,16 @@
             border-collapse: collapse;
             margin-bottom: 15px;
         }
-
         th, td {
             border: 1px solid #ddd;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
+            font-size: 14px;
         }
-
         th {
             background: #007bff;
             color: white;
-        }
-
-        input[type="number"] {
-            width: 95%;
-            padding: 8px;
-            border: 1px solid #aaa;
-            border-radius: 5px;
+            font-size: 15px;
         }
 
         button {
@@ -63,13 +60,14 @@
             border: none;
             border-radius: 6px;
             color: white;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
+            margin-top: 5px;
         }
 
         .btnAgregar {
             background: #28a745;
-            margin-bottom: 15px;
+            width: 100%;
         }
         .btnAgregar:hover { background: #218838; }
 
@@ -82,7 +80,6 @@
         .btnVolver {
             background: #6c757d;
             width: 100%;
-            margin-top: 8px;
         }
         .btnVolver:hover { background: #565e64; }
 
@@ -92,6 +89,18 @@
             font-size: 14px;
         }
         .btnEliminar:hover { background: #c82333; }
+
+        /* RESPONSIVO */
+        @media screen and (max-width: 600px) {
+            th, td {
+                font-size: 13px;
+                padding: 8px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -99,11 +108,10 @@
 <div class="box">
     <h2>Solicitar Materiales</h2>
 
-    <!-- ✅ SELECTOR DE DOCENTE -->
+    <!-- Docente -->
     <label>Docente Responsable:</label>
     <select id="docente">
         <option value="" disabled selected>Seleccione un docente...</option>
-
         <option>AARÓN EDUARDO SEPÚLVEDA MEDINA</option>
         <option>ALEJANDRO GABRIEL MOENA VALDERRAMA</option>
         <option>BRAYAN PATRICIO DEL VALLE AEDO</option>
@@ -125,11 +133,10 @@
         <option>RODRIGO ALEJANDRO GARRIDO GARRIDO</option>
         <option>ROLANDO EDUARDO ORTEGA FUENTES</option>
         <option>VÍCTOR EDUARDO ZAPATA MYRIK</option>
-
         <option>OTROS DOCENTES</option>
     </select>
 
-    <!-- ✅ ASIGNATURA AHORA INPUT DE TEXTO -->
+    <!-- Asignatura -->
     <label>Asignatura:</label>
     <input type="text" id="asignatura" placeholder="Ejemplo: Electrónica de Potencia">
 
@@ -160,20 +167,17 @@
 function agregarFila() {
     const cuerpo = document.getElementById("cuerpoTabla");
     const fila = document.createElement("tr");
-
     fila.innerHTML = `
         <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
         <td><input type="number" min="1" value="1" class="inputCantidad"></td>
         <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
     `;
-
     cuerpo.appendChild(fila);
 }
 
 function eliminarFila(boton) {
     const fila = boton.parentNode.parentNode;
     const cuerpo = document.getElementById("cuerpoTabla");
-
     if (cuerpo.rows.length > 1) {
         fila.remove();
     } else {
@@ -202,12 +206,10 @@ function enviarSolicitud() {
     for (let i = 0; i < nombres.length; i++) {
         const nombre = nombres[i].value.trim();
         const cantidad = cantidades[i].value.trim();
-
         if (!nombre || !cantidad) {
             alert("Todos los campos deben estar completos.");
             return;
         }
-
         materiales.push({ nombre, cantidad });
     }
 
