@@ -12,14 +12,26 @@
         .box {
             background: white;
             padding: 20px;
-            max-width: 650px;
+            max-width: 700px;
             margin: auto;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
         h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
         }
 
         table {
@@ -27,13 +39,11 @@
             border-collapse: collapse;
             margin-bottom: 15px;
         }
-
         th, td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: left;
         }
-
         th {
             background: #007bff;
             color: white;
@@ -87,6 +97,32 @@
 <div class="box">
     <h2>Solicitar Materiales</h2>
 
+    <!-- ✅ SELECTOR DE DOCENTE -->
+    <label>Docente Responsable:</label>
+    <select id="docente">
+        <option value="" disabled selected>Seleccione un docente...</option>
+        <option>Joseph Parra</option>
+        <option>Michael Fernández</option>
+        <option>Rodrigo Navarro</option>
+        <option>Sandra López</option>
+        <option>Otro docente</option>
+    </select>
+
+    <!-- ✅ SELECTOR DE ASIGNATURA -->
+    <label>Asignatura:</label>
+    <select id="asignatura">
+        <option value="" disabled selected>Seleccione una asignatura...</option>
+        <option>Electrotecnia</option>
+        <option>Instalaciones Eléctricas</option>
+        <option>Robótica I</option>
+        <option>Robótica II</option>
+        <option>Automatización Industrial</option>
+        <option>Electrónica de Potencia</option>
+        <option>Mecatrónica</option>
+        <option>Proyecto Integrador</option>
+        <option>Otra asignatura</option>
+    </select>
+
     <button class="btnAgregar" onclick="agregarFila()">+ Agregar Material</button>
 
     <table id="tablaMateriales">
@@ -137,6 +173,14 @@ function eliminarFila(boton) {
 }
 
 function enviarSolicitud() {
+    const docente = document.getElementById("docente").value;
+    const asignatura = document.getElementById("asignatura").value;
+
+    if (!docente || !asignatura) {
+        alert("Debe seleccionar docente y asignatura.");
+        return;
+    }
+
     const nombres = document.querySelectorAll(".inputNombre");
     const cantidades = document.querySelectorAll(".inputCantidad");
 
@@ -154,11 +198,13 @@ function enviarSolicitud() {
         materiales.push({ nombre, cantidad });
     }
 
-    console.log("Solicitud enviada (demo):", materiales);
+    console.log("Solicitud enviada (demo):", {
+        docente,
+        asignatura,
+        materiales
+    });
 
-    alert("Solicitud enviada correctamente (versión demo).");
-
-    // FASE 2: Aquí guardaremos la solicitud real
+    alert("Solicitud enviada correctamente (demo).");
 }
 </script>
 
