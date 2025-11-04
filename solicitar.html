@@ -1,107 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Solicitar Materiales</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            padding: 10px;
-        }
-        .box {
-            background: white;
-            padding: 20px;
-            max-width: 700px;
-            margin: auto;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+<meta charset="UTF-8">
+<title>Solicitar Materiales</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        padding: 10px;
+    }
+    .box {
+        background: white;
+        padding: 20px;
+        max-width: 700px;
+        margin: auto;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+    }
+    select, input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
 
-        label {
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-        }
+    /* Contenedor scrollable para tabla en móvil */
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 15px;
+    }
 
-        select, input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #aaa;
-            font-size: 16px;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 400px; /* Evita que la tabla se comprima demasiado */
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
+    }
+    th {
+        background: #007bff;
+        color: white;
+        font-size: 15px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
+    button {
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 5px;
+        width: 100%;
+    }
+
+    .btnAgregar { background: #28a745; }
+    .btnAgregar:hover { background: #218838; }
+
+    .btnEnviar { background: #007bff; margin-top: 10px; }
+    .btnEnviar:hover { background: #0056b3; }
+
+    .btnVolver { background: #6c757d; margin-top: 5px; }
+    .btnVolver:hover { background: #565e64; }
+
+    .btnEliminar {
+        background: #dc3545;
+        padding: 8px;
+        font-size: 14px;
+        width: 100%;
+    }
+    .btnEliminar:hover { background: #c82333; }
+
+    /* RESPONSIVO */
+    @media screen and (max-width: 600px) {
         th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-            font-size: 14px;
-        }
-        th {
-            background: #007bff;
-            color: white;
-            font-size: 15px;
-        }
-
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        .btnAgregar {
-            background: #28a745;
-            width: 100%;
-        }
-        .btnAgregar:hover { background: #218838; }
-
-        .btnEnviar {
-            background: #007bff;
-            width: 100%;
-        }
-        .btnEnviar:hover { background: #0056b3; }
-
-        .btnVolver {
-            background: #6c757d;
-            width: 100%;
-        }
-        .btnVolver:hover { background: #565e64; }
-
-        .btnEliminar {
-            background: #dc3545;
+            font-size: 13px;
             padding: 8px;
+        }
+        button {
             font-size: 14px;
+            padding: 10px;
         }
-        .btnEliminar:hover { background: #c82333; }
-
-        /* RESPONSIVO */
-        @media screen and (max-width: 600px) {
-            th, td {
-                font-size: 13px;
-                padding: 8px;
-            }
-            button {
-                font-size: 14px;
-                padding: 10px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
 
@@ -142,22 +140,24 @@
 
     <button class="btnAgregar" onclick="agregarFila()">+ Agregar Material</button>
 
-    <table id="tablaMateriales">
-        <thead>
-            <tr>
-                <th>Material o Equipo</th>
-                <th style="width:120px;">Cantidad</th>
-                <th style="width:100px;">Acción</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpoTabla">
-            <tr>
-                <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
-                <td><input type="number" min="1" value="1" class="inputCantidad"></td>
-                <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table id="tablaMateriales">
+            <thead>
+                <tr>
+                    <th>Material o Equipo</th>
+                    <th style="width:120px;">Cantidad</th>
+                    <th style="width:100px;">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+                <tr>
+                    <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
+                    <td><input type="number" min="1" value="1" class="inputCantidad"></td>
+                    <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <button class="btnEnviar" onclick="enviarSolicitud()">Enviar Solicitud</button>
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
