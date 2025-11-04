@@ -20,6 +20,7 @@
         button:hover { background: #0056b3; }
         .hidden { display: none; }
         a { color: #007bff; cursor: pointer; }
+        .error { color: red; font-size: 14px; margin-top: -10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -44,7 +45,12 @@
 <!-- REGISTRO -->
 <div class="box hidden" id="registerBox">
     <h2>Registro</h2>
+
     <input type="text" id="regNombre" placeholder="Nombre Completo">
+    
+    <input type="text" id="regRut" placeholder="RUT (Ej: 12.345.678-5)">
+    <p id="rutError" class="error"></p>
+
     <select id="regCarrera">
         <option value="">Seleccione una carrera</option>
         <option>Ingeniería Eléctrica</option>
@@ -56,10 +62,11 @@
         <option>Área Mecánica</option>
         <option>Otras Áreas</option>
     </select>
-    <input type="tel" id="regTelefono" placeholder="Ej: +56911111111">
+
+    <input type="tel" id="regTelefono" placeholder="Teléfono (Ej: +56911111111)">
     <input type="email" id="regEmail" placeholder="Correo">
     <input type="password" id="regPass" placeholder="Contraseña">
-    <button onclick="goMenu()">Crear Cuenta</button>
+    <button onclick="registrar()">Crear Cuenta</button>
     <p><a onclick="showLogin()">Ya tengo cuenta</a></p>
     <p><a onclick="showWelcome()">Volver</a></p>
 </div>
@@ -74,21 +81,99 @@ function hideAll() {
 function showWelcome() {
     hideAll();
     document.getElementById("welcomeBox").classList.remove("hidden");
+    clearRutError();
 }
 
 function showLogin() {
     hideAll();
     document.getElementById("loginBox").classList.remove("hidden");
+    clearRutError();
 }
 
 function showRegister() {
     hideAll();
     document.getElementById("registerBox").classList.remove("hidden");
+    clearRutError();
 }
 
 function goMenu() {
     window.location.href = "menu.html";
 }
+
+/* ---------- RUT Validation ---------- */
+/* Accepts RUT with or without dots, with hyphen before DV.
+   Example acceptable inputs: "12.345.678-5" or "12345678-5" */
+function limpiarRut(rut) {
+    return rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
+}
+
+function dvT(rut) {
+    // calcula dígito verificador esperado
+    let M = 0, S = 1;
+    for (; rut; rut = Math.floor(rut / 10))
+        S = (S + rut % 10 * (9 - M++ % 6)) % 11;
+    return S ? S - 1 : 'K';
+}
+
+function validarRutCompleto(rutCompleto) {
+    if(!rutCompleto) return false;
+    const r = limpiarRut(rutCompleto);
+    const parts = r.split('-');
+    if(parts.length !== 2) return false;
+    const num = parts[0];
+    let dv = parts[1];
+    if(!/^\d+$/.test(num)) return false;
+    // normalizar dv
+    dv = dv === 'K' ? 'K' : dv;
+    const expected = dvT(parseInt(num,10)).toString();
+    // dvT returns 'K' as string only when S==0; we normalize:
+    const expectedNorm = (expected === 'K') ? 'K' : expected;
+    return expectedNorm === dv;
+}
+
+function showRutError(msg) {
+    document.getElementById("rutError").textContent = msg;
+}
+
+function clearRutError() {
+    document.getElementById("rutError").textContent = "";
+}
+
+/* ---------- Registro (demo) ---------- */
+function registrar() {
+    clearRutError();
+    const nombre = document.getElementById("regNombre").value.trim();
+    const rut = document.getElementById("regRut").value.trim();
+    const carrera = document.getElementById("regCarrera").value.trim();
+    const telefono = document.getElementById("regTelefono").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if(!nombre || !rut || !carrera || !telefono || !email || !pass) {
+        alert("Complete todos los campos.");
+        return;
+    }
+
+    // validar formato telefono básico
+    const telRegex = /^\+569\d{8}$/;
+    if(!telRegex.test(telefono)) {
+        alert("Número de teléfono inválido. Formato: +569xxxxxxxx");
+        return;
+    }
+
+    // validar RUT
+    if(!validarRutCompleto(rut)) {
+        showRutError("RUT inválido. Ingrese en formato: 12.345.678-5 o 12345678-5 y verifique el dígito.");
+        return;
+    }
+
+    // registro demo: redirigir al menú (en la Fase 2 guardaremos el usuario)
+    alert("Registro exitoso (versión demo).");
+    goMenu();
+}
+
+// inicial: mostrar bienvenida
+showWelcome();
 </script>
 
 </body>
