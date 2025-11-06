@@ -1,94 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Solicitudes Pendientes</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f0f2f5;
-        padding: 10px;
-    }
-    .box {
-        background: white;
-        padding: 20px;
-        max-width: 750px;
-        margin: auto;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .solicitud {
-        margin-bottom: 25px;
-        padding: 15px;
-        border-left: 5px solid #007bff;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    .solicitud h3 {
-        margin: 0 0 10px 0;
-        font-size: 16px;
-    }
-    .table-container {
-        overflow-x: auto;
-        margin-bottom: 12px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 400px;
-    }
-    th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-        font-size: 14px;
-    }
-    th {
-        background: #007bff;
-        color: white;
-        font-size: 15px;
-    }
-    input[type="checkbox"] {
-        transform: scale(1.3);
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 5px;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        color: white;
-    }
-    .btnCompletar { background: #28a745; }
-    .btnCompletar:hover { background: #218838; }
-    .btnVolver { background: #6c757d; margin-top: 10px; }
-    .btnVolver:hover { background: #565e64; }
+    <meta charset="UTF-8">
+    <title>Solicitudes Pendientes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+        h2 { text-align:center; }
 
-    /* RESPONSIVO */
-    @media screen and (max-width: 600px){
-        th, td { font-size: 13px; padding: 8px; }
-        h3 { font-size: 14px; }
-        button { font-size: 14px; padding: 10px; }
-    }
-</style>
+        .solicitud {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid #007bff;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .solicitud h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+        td input[type="checkbox"] {
+            width: 20px; height: 20px; cursor: pointer;
+        }
+
+        .btnCompletar {
+            background: #28a745;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btnCompletar:hover { background: #218838; }
+
+        .btnVolver {
+            background: #6c757d;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="box">
     <h2>Solicitudes Pendientes</h2>
+    <div id="contenedor"></div>
 
-    <!-- SOLICITUD DE EJEMPLO (DEMO) -->
-    <div class="solicitud">
-        <h3>Solicitud #1 – Estado: Pendiente</h3>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+</div>
 
-        <div class="table-container">
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzhgxzzqjU6JOTGhac5wNE8n9SU7a1iVIPq356x5NGbdaVj3-pVZ1hQP4WLOXTi_ACJ/exec";
+
+/* ----------- VALIDAR SESIÓN ----------- */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+    window.location.href = "index.html";
+}
+
+/* ----------- CARGAR SOLICITUDES ----------- */
+async function cargarSolicitudes() {
+    try {
+        const res = await fetch(API_URL + "?action=getSolicitudes&email=" + user.email);
+        const json = await res.json();
+
+        if (!json.ok) {
+            document.getElementById("contenedor").innerHTML = 
+                "<p>No se encontraron solicitudes pendientes.</p>";
+            return;
+        }
+
+        mostrarSolicitudes(json.data);
+
+    } catch (err) {
+        alert("Error al cargar solicitudes.");
+    }
+}
+
+function mostrarSolicitudes(lista) {
+    const div = document.getElementById("contenedor");
+    div.innerHTML = "";
+
+    lista.forEach(sol => {
+        const html = `
+        <div class="solicitud" id="sol-${sol.id}">
+            <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
+            <p><b>Fecha:</b> ${sol.fecha}</p>
+            <p><b>Docente:</b> ${sol.docente}</p>
+            <p><b>Asignatura:</b> ${sol.asignatura}</p>
+
             <table>
                 <thead>
                     <tr>
@@ -98,30 +137,60 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Multímetro UT33C</td>
-                        <td>2</td>
-                        <td style="text-align:center;"><input type="checkbox"></td>
-                    </tr>
-                    <tr>
-                        <td>Cables de prueba</td>
-                        <td>4</td>
-                        <td style="text-align:center;"><input type="checkbox"></td>
-                    </tr>
+                    ${sol.materiales.map(m => `
+                        <tr>
+                            <td>${m.nombre}</td>
+                            <td>${m.cantidad}</td>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="chk-${sol.id}">
+                            </td>
+                        </tr>
+                    `).join('')}
                 </tbody>
             </table>
+
+            <button class="btnCompletar" onclick="completar(${sol.id})">
+                Marcar Como Completada
+            </button>
         </div>
+        `;
 
-        <button class="btnCompletar" onclick="marcarEntregada(this)">Marcar Como Completada</button>
-    </div>
-
-    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
-</div>
-
-<script>
-function marcarEntregada(boton) {
-    alert("Solicitud marcada como completada ✅ (modo demo)");
+        div.innerHTML += html;
+    });
 }
+
+/* ----------- MARCAR SOLICITUD COMO COMPLETADA ----------- */
+async function completar(id) {
+    if (!confirm("¿Confirmar que esta solicitud fue entregada?")) return;
+
+    const data = {
+        action: "completarSolicitud",
+        id: id
+    };
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+
+        if (!json.ok) {
+            alert("Error: " + json.msg);
+            return;
+        }
+
+        alert("✅ Solicitud marcada como completada.");
+        cargarSolicitudes(); // refrescar lista
+
+    } catch (err) {
+        alert("Error de conexión.");
+    }
+}
+
+/* ----------- INICIO ----------- */
+cargarSolicitudes();
 </script>
 
 </body>
