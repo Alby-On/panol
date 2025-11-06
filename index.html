@@ -3,53 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>Solicitud de Materiales - Inicio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f0f2f5; 
-            padding: 10px; 
+            font-family: Arial; 
+            background: #f5f5f5; 
+            padding: 20px;
+            margin: 0;
         }
         .box {
-            background: white; 
-            padding: 20px; 
-            max-width: 400px; 
-            margin: auto; 
-            border-radius: 12px; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            background: white; padding: 20px; width: 100%;
+            max-width: 420px; margin: auto; margin-top: 20px;
+            border-radius: 12px; box-shadow: 0 0 10px #ccc;
         }
-        h2 { text-align: center; margin-bottom: 20px; }
         input, select {
-            width: 100%; 
-            padding: 12px; 
-            margin: 5px 0 15px; 
-            border-radius: 6px; 
-            border: 1px solid #aaa; 
+            width: 100%; padding: 12px; margin: 8px 0 18px;
+            border-radius: 7px; border: 1px solid #aaa;
             font-size: 16px;
-            box-sizing: border-box;
         }
         button {
-            width: 100%; 
-            padding: 12px; 
-            margin-top: 5px;
-            border: none; 
-            border-radius: 6px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            color: white;
+            width: 100%; background: #007bff; color: white; padding: 12px;
+            border: none; border-radius: 7px; cursor: pointer;
+            font-size: 17px;
         }
-        button:hover { opacity: 0.9; }
-        .btnPrimary { background: #007bff; }
-        .btnPrimary:hover { background: #0056b3; }
-        .btnSecondary { background: #6c757d; }
-        .btnSecondary:hover { background: #565e64; }
+        button:hover { background: #0056b3; }
         .hidden { display: none; }
-        a { color: #007bff; cursor: pointer; display: inline-block; margin-top: 5px; }
-        .error { color: red; font-size: 14px; margin-top: -10px; margin-bottom: 10px; }
-
-        @media screen and (max-width: 400px){
-            input, select, button { font-size: 14px; padding: 10px; }
-        }
+        a { color: #007bff; cursor: pointer; }
+        .error { color: red; font-size: 14px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -57,9 +37,9 @@
 <!-- BIENVENIDA -->
 <div class="box" id="welcomeBox">
     <h2>Bienvenido(a)</h2>
-    <p>Esta es la plataforma de <b>solicitud de materiales e insumos</b> del área.</p>
-    <button class="btnPrimary" onclick="showLogin()">Iniciar Sesión</button><br><br>
-    <button class="btnPrimary" onclick="showRegister()">Registrarse</button>
+    <p>Plataforma de <b>solicitud de materiales e insumos</b> del área.</p>
+    <button onclick="showLogin()">Iniciar Sesión</button><br><br>
+    <button onclick="showRegister()">Registrarse</button>
 </div>
 
 <!-- LOGIN -->
@@ -67,7 +47,7 @@
     <h2>Iniciar Sesión</h2>
     <input type="email" placeholder="Correo" id="loginEmail">
     <input type="password" placeholder="Contraseña" id="loginPass">
-    <button class="btnPrimary" onclick="goMenu()">Ingresar</button>
+    <button onclick="login()">Ingresar</button>
     <p><a onclick="showRegister()">Registrarme</a></p>
     <p><a onclick="showWelcome()">Volver</a></p>
 </div>
@@ -97,64 +77,155 @@
     <input type="email" id="regEmail" placeholder="Correo">
     <input type="password" id="regPass" placeholder="Contraseña">
 
-    <button class="btnPrimary" onclick="registrar()">Crear Cuenta</button>
+    <button onclick="registrar()">Crear Cuenta</button>
 
     <p><a onclick="showLogin()">Ya tengo cuenta</a></p>
     <p><a onclick="showWelcome()">Volver</a></p>
 </div>
 
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzhgxzzqjU6JOTGhac5wNE8n9SU7a1iVIPq356x5NGbdaVj3-pVZ1hQP4WLOXTi_ACJ/exec";
+
 /* ------------------ CAMBIO DE PANTALLAS ------------------ */
+
 function hideAll() {
-    document.getElementById("welcomeBox").classList.add("hidden");
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("registerBox").classList.add("hidden");
+    welcomeBox.classList.add("hidden");
+    loginBox.classList.add("hidden");
+    registerBox.classList.add("hidden");
 }
-function showWelcome() { hideAll(); document.getElementById("welcomeBox").classList.remove("hidden"); clearRutError(); }
-function showLogin() { hideAll(); document.getElementById("loginBox").classList.remove("hidden"); clearRutError(); }
-function showRegister() { hideAll(); document.getElementById("registerBox").classList.remove("hidden"); clearRutError(); }
-function goMenu() { window.location.href = "menu.html"; }
+
+function showWelcome() { hideAll(); welcomeBox.classList.remove("hidden"); }
+function showLogin() { hideAll(); loginBox.classList.remove("hidden"); }
+function showRegister() { hideAll(); registerBox.classList.remove("hidden"); }
+
 
 /* ------------------ VALIDACIÓN DE RUT ------------------ */
-function limpiarRut(rut) { return rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase(); }
-function dvT(rut){let M=0,S=1;for(;rut;rut=Math.floor(rut/10))S=(S+rut%10*(9-M++%6))%11;return S?S-1:"K";}
-function validarRutCompleto(rutCompleto){
-    if(!rutCompleto) return {ok:false,msg:"Debe ingresar un RUT."};
+
+function limpiarRut(rut) {
+    return rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
+}
+
+function dvT(rut) {
+    let M = 0, S = 1;
+    for (; rut; rut = Math.floor(rut / 10))
+        S = (S + rut % 10 * (9 - M++ % 6)) % 11;
+    return S ? S - 1 : "K";
+}
+
+function validarRutCompleto(rutCompleto) {
+    if (!rutCompleto) return { ok: false, msg: "Debe ingresar un RUT." };
+
     const r = limpiarRut(rutCompleto);
-    if(!r.includes("-")) return {ok:false,msg:"El RUT debe contener guion. Ej: 12.345.678-5"};
-    const [num,dv] = r.split("-");
-    if(num.length<7||num.length>9) return {ok:false,msg:"El RUT es demasiado corto o demasiado largo."};
-    if(!/^\d+$/.test(num)) return {ok:false,msg:"La parte numérica del RUT solo puede contener números."};
-    const dvCalculado=dvT(parseInt(num,10)).toString();
-    const dvNormalizado = dvCalculado==="K"?"K":dvCalculado;
-    if(dv.toUpperCase()!==dvNormalizado) return {ok:false,msg:"Dígito verificador incorrecto."};
-    return {ok:true};
-}
-function showRutError(msg){ document.getElementById("rutError").textContent=msg; }
-function clearRutError(){ document.getElementById("rutError").textContent=""; }
 
-/* ------------------ REGISTRO (DEMO SIN BASE DE DATOS) ------------------ */
-function registrar(){
+    if (!r.includes("-")) return { ok: false, msg: "El RUT debe contener guion." };
+
+    const [num, dv] = r.split("-");
+
+    if (!/^\d+$/.test(num)) return { ok: false, msg: "La parte numérica debe ser solo números." };
+
+    const dvCorrecto = dvT(parseInt(num, 10)).toString();
+
+    if (dv.toUpperCase() !== dvCorrecto) return { ok: false, msg: "Dígito verificador incorrecto." };
+
+    return { ok: true };
+}
+
+function clearRutError() {
+    document.getElementById("rutError").textContent = "";
+}
+
+
+/* ------------------ REGISTRO (BACKEND) ------------------ */
+
+async function registrar() {
     clearRutError();
-    const nombre = document.getElementById("regNombre").value.trim();
-    const rut = document.getElementById("regRut").value.trim();
-    const carrera = document.getElementById("regCarrera").value.trim();
-    const telefono = document.getElementById("regTelefono").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const pass = document.getElementById("regPass").value.trim();
-    if(!nombre||!rut||!carrera||!telefono||!email||!pass){ alert("Complete todos los campos."); return; }
-    const telRegex = /^\+569\d{8}$/;
-    if(!telRegex.test(telefono)){ alert("Número de teléfono inválido. Formato: +569xxxxxxxx"); return; }
-    const rutValido = validarRutCompleto(rut);
-    if(!rutValido.ok){ showRutError(rutValido.msg); return; }
-    alert("Registro exitoso (demo).");
-    goMenu();
+
+    const data = {
+        action: "register",
+        nombre: regNombre.value.trim(),
+        rut: regRut.value.trim(),
+        carrera: regCarrera.value,
+        telefono: regTelefono.value.trim(),
+        email: regEmail.value.trim(),
+        pass: regPass.value.trim()
+    };
+
+    if (!data.nombre || !data.rut || !data.carrera || !data.telefono || !data.email || !data.pass) {
+        alert("Complete todos los campos.");
+        return;
+    }
+
+    const rutVal = validarRutCompleto(data.rut);
+    if (!rutVal.ok) {
+        rutError.textContent = rutVal.msg;
+        return;
+    }
+
+    if (!/^\+569\d{8}$/.test(data.telefono)) {
+        alert("Teléfono inválido. Formato correcto: +569xxxxxxxx");
+        return;
+    }
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+        const json = await res.json();
+
+        if (!json.ok) {
+            alert("Error: " + json.msg);
+            return;
+        }
+
+        alert("✅ Registro exitoso. Ahora puede iniciar sesión.");
+        showLogin();
+
+    } catch (err) {
+        alert("Error de conexión con el servidor.");
+    }
 }
 
-// Inicializa pantalla
+
+/* ------------------ LOGIN (BACKEND) ------------------ */
+
+async function login() {
+    const data = {
+        action: "login",
+        email: loginEmail.value.trim(),
+        pass: loginPass.value.trim()
+    };
+
+    if (!data.email || !data.pass) {
+        alert("Complete todos los campos.");
+        return;
+    }
+
+    try {
+        const res = await fetch(API_URL + "?action=login&email=" + data.email + "&pass=" + data.pass);
+        const json = await res.json();
+
+        if (!json.ok) {
+            alert("❌ " + json.msg);
+            return;
+        }
+
+        // Guardar usuario temporalmente
+        localStorage.setItem("currentUser", JSON.stringify(json.data));
+
+        window.location.href = "menu.html";
+
+    } catch (err) {
+        alert("Error de conexión.");
+    }
+}
+
+
+// PANTALLA INICIAL
 showWelcome();
 </script>
 
 </body>
 </html>
+
 
