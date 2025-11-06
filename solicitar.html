@@ -1,115 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Solicitar Materiales</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f0f2f5;
-        padding: 10px;
-    }
-    .box {
-        background: white;
-        padding: 20px;
-        max-width: 700px;
-        margin: auto;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    label {
-        font-weight: bold;
-        margin-top: 10px;
-        display: block;
-    }
-    select, input[type="text"], input[type="number"] {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        border-radius: 6px;
-        border: 1px solid #aaa;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
-
-    /* Contenedor scrollable para tabla en móvil */
-    .table-container {
-        overflow-x: auto;
-        margin-bottom: 15px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 400px; /* Evita que la tabla se comprima demasiado */
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-        font-size: 14px;
-    }
-    th {
-        background: #007bff;
-        color: white;
-        font-size: 15px;
-    }
-
-    button {
-        padding: 12px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 5px;
-        width: 100%;
-    }
-
-    .btnAgregar { background: #28a745; }
-    .btnAgregar:hover { background: #218838; }
-
-    .btnEnviar { background: #007bff; margin-top: 10px; }
-    .btnEnviar:hover { background: #0056b3; }
-
-    .btnVolver { background: #6c757d; margin-top: 5px; }
-    .btnVolver:hover { background: #565e64; }
-
-    .btnEliminar {
-        background: #dc3545;
-        padding: 8px;
-        font-size: 14px;
-        width: 100%;
-    }
-    .btnEliminar:hover { background: #c82333; }
-
-    /* RESPONSIVO */
-    @media screen and (max-width: 600px) {
-        th, td {
-            font-size: 13px;
-            padding: 8px;
+    <meta charset="UTF-8">
+    <title>Solicitar Materiales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
         }
-        button {
-            font-size: 14px;
+        .box {
+            background: white;
+            padding: 20px;
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+        h2 { text-align: center; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
             padding: 10px;
         }
-    }
-</style>
+        th {
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+        td input {
+            width: 100%;
+            padding: 7px;
+            font-size: 14px;
+        }
+        .btnAdd, .btnRemove {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            margin-top: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .btnRemove { background: #dc3545; }
+        .btnEnviar {
+            background: #28a745;
+            margin-top: 15px;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+        .btnVolver {
+            background: #6c757d;
+            margin-top: 10px;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+    </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Solicitar Materiales</h2>
+    <h2>Solicitud de Materiales</h2>
 
-    <!-- Docente -->
-    <label>Docente Responsable:</label>
+    <label><b>Docente a cargo:</b></label>
     <select id="docente">
-        <option value="" disabled selected>Seleccione un docente...</option>
+        <option value="">Seleccione un docente</option>
         <option>AARÓN EDUARDO SEPÚLVEDA MEDINA</option>
         <option>ALEJANDRO GABRIEL MOENA VALDERRAMA</option>
         <option>BRAYAN PATRICIO DEL VALLE AEDO</option>
@@ -134,95 +119,117 @@
         <option>OTROS DOCENTES</option>
     </select>
 
-    <!-- Asignatura -->
-    <label>Asignatura:</label>
-    <input type="text" id="asignatura" placeholder="Ejemplo: Electrónica de Potencia">
+    <label><b>Asignatura:</b></label>
+    <input type="text" id="asignatura" placeholder="Ej: Instalaciones Eléctricas II">
 
-    <button class="btnAgregar" onclick="agregarFila()">+ Agregar Material</button>
+    <h3>Materiales Solicitados</h3>
 
-    <div class="table-container">
-        <table id="tablaMateriales">
-            <thead>
-                <tr>
-                    <th>Material o Equipo</th>
-                    <th style="width:120px;">Cantidad</th>
-                    <th style="width:100px;">Acción</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoTabla">
-                <tr>
-                    <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
-                    <td><input type="number" min="1" value="1" class="inputCantidad"></td>
-                    <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <table id="tabla">
+        <thead>
+            <tr>
+                <th>Material / Equipo</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr>
+                <td><input type="text" placeholder="Ej: Multímetro UT33C"></td>
+                <td><input type="number" min="1" value="1"></td>
+            </tr>
+        </tbody>
+    </table>
 
-    <button class="btnEnviar" onclick="enviarSolicitud()">Enviar Solicitud</button>
+    <button class="btnAdd" onclick="addRow()">➕ Agregar Material</button>
+    <button class="btnRemove" onclick="removeRow()">➖ Eliminar Último</button>
+
+    <button class="btnEnviar" onclick="enviar()">Enviar Solicitud</button>
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
-function agregarFila() {
-    const cuerpo = document.getElementById("cuerpoTabla");
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-        <td><input type="text" placeholder="Ej: Multímetro UT33C" class="inputNombre"></td>
-        <td><input type="number" min="1" value="1" class="inputCantidad"></td>
-        <td><button class="btnEliminar" onclick="eliminarFila(this)">Eliminar</button></td>
-    `;
-    cuerpo.appendChild(fila);
+const API_URL = "https://script.google.com/macros/s/AKfycbzhgxzzqjU6JOTGhac5wNE8n9SU7a1iVIPq356x5NGbdaVj3-pVZ1hQP4WLOXTi_ACJ/exec";
+
+/* ----------- VERIFICAR USUARIO LOGEADO ----------- */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+    window.location.href = "index.html";
 }
 
-function eliminarFila(boton) {
-    const fila = boton.parentNode.parentNode;
-    const cuerpo = document.getElementById("cuerpoTabla");
-    if (cuerpo.rows.length > 1) {
-        fila.remove();
+/* ----------- AGREGAR FILA ----------- */
+function addRow() {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td><input type="text" placeholder="Ej: Cables de prueba"></td>
+        <td><input type="number" min="1" value="1"></td>
+    `;
+    document.getElementById("tbody").appendChild(tr);
+}
+
+/* ----------- ELIMINAR ÚLTIMA FILA ----------- */
+function removeRow() {
+    const tbody = document.getElementById("tbody");
+    if (tbody.rows.length > 1) {
+        tbody.deleteRow(tbody.rows.length - 1);
     } else {
         alert("Debe haber al menos un material.");
     }
 }
 
-function enviarSolicitud() {
+/* ----------- ENVIAR SOLICITUD AL BACKEND ----------- */
+async function enviar() {
     const docente = document.getElementById("docente").value;
     const asignatura = document.getElementById("asignatura").value.trim();
 
-    if (!docente) {
-        alert("Debe seleccionar un docente.");
-        return;
-    }
-    if (!asignatura) {
-        alert("Debe escribir la asignatura.");
-        return;
-    }
+    if (!docente) { alert("Seleccione un docente."); return; }
+    if (!asignatura) { alert("Ingrese la asignatura."); return; }
 
-    const nombres = document.querySelectorAll(".inputNombre");
-    const cantidades = document.querySelectorAll(".inputCantidad");
+    const filas = document.querySelectorAll("#tbody tr");
+    const materiales = [];
 
-    let materiales = [];
-
-    for (let i = 0; i < nombres.length; i++) {
-        const nombre = nombres[i].value.trim();
-        const cantidad = cantidades[i].value.trim();
-        if (!nombre || !cantidad) {
-            alert("Todos los campos deben estar completos.");
-            return;
+    filas.forEach(f => {
+        const nombre = f.children[0].querySelector("input").value.trim();
+        const cantidad = f.children[1].querySelector("input").value.trim();
+        if (nombre && cantidad) {
+            materiales.push({ nombre, cantidad });
         }
-        materiales.push({ nombre, cantidad });
+    });
+
+    if (materiales.length === 0) {
+        alert("Debe ingresar al menos un material.");
+        return;
     }
 
-    console.log("Solicitud enviada (demo):", {
+    const data = {
+        action: "nuevaSolicitud",
+        userEmail: user.email,
         docente,
         asignatura,
         materiales
-    });
+    };
 
-    alert("Solicitud enviada correctamente (demo).");
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+
+        if (!json.ok) {
+            alert("Error: " + json.msg);
+            return;
+        }
+
+        alert("✅ Solicitud enviada con éxito.");
+        location.href = "menu.html";
+
+    } catch (err) {
+        alert("Error de conexión con el servidor.");
+    }
 }
 </script>
 
 </body>
 </html>
+
 
