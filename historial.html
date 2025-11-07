@@ -2,186 +2,138 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Historial de Solicitudes</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
             font-family: Arial;
             background: #f0f2f5;
-            padding: 15px;
+            padding: 10px;
             margin: 0;
         }
-
         .box {
-            max-width: 600px;
-            margin: auto;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .card {
             background: white;
-            border-radius: 12px;
             padding: 15px;
+            max-width: 700px;
+            margin: auto;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
             margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-
-        .card-header h3 {
-            margin: 0;
-            font-size: 18px;
-        }
-
-        .estado {
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: white;
-        }
-        .pendiente { background: #ffc107; }
-        .entregada { background: #28a745; }
-
-        .materiales {
-            margin-top: 12px;
-            padding-left: 10px;
-        }
-
+        h2 { text-align: center; margin-bottom: 15px; }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             padding: 8px;
             font-size: 14px;
+            text-align: left;
         }
-        th {
-            background: #007bff;
-            color: white;
-        }
-
-        .volver {
-            width: 100%;
+        th { background: #007bff; color: white; }
+        .btnVolver {
             background: #6c757d;
             color: white;
-            padding: 12px;
             border: none;
-            border-radius: 7px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
             font-size: 16px;
-            margin-top: 15px;
             cursor: pointer;
+            margin-top: 10px;
         }
-        .volver:hover { background: #565e64; }
+        .btnVolver:hover { background: #565e64; }
+        .solicitud-header {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .estado-pendiente { color: orange; font-weight: bold; }
+        .estado-entregado { color: green; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h2>Historial de Solicitudes</h2>
-
-    <div id="contenedorSolicitudes"></div>
-
-    <button class="volver" onclick="location.href='menu.html'">Volver al Menú</button>
+    <div id="solicitudesContainer">
+        <p>Cargando solicitudes...</p>
+    </div>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
 </div>
 
 <script>
-const API_URL = "TU_URL_DEL_WEBAPP_AQUÍ";
+const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
-// Usuario actual
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) location.href = "index.html";
-
-// -----------------------------------------------------
-// Cargar historial desde el servidor
-// -----------------------------------------------------
+// Cargar solicitudes del usuario actual
 async function cargarHistorial() {
-    const res = await fetch(`${API_URL}?action=historial&email=${user.email}`);
-    const json = await res.json();
-
-    if (!json.ok) {
-        document.getElementById("contenedorSolicitudes").innerHTML =
-            "<p>No se pudo cargar el historial.</p>";
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    if (!user) {
+        alert("No se encontró usuario activo.");
+        location.href = "index.html";
         return;
     }
 
-    const solicitudes = json.data.reverse(); // mostrar las más nuevas arriba
-    mostrarSolicitudes(solicitudes);
+    try {
+        const res = await fetch(`${API_URL}?action=getSolicitudes&email=${encodeURIComponent(user.email)}`);
+        const json = await res.json();
+
+        if (!json.ok) {
+            document.getElementById("solicitudesContainer").innerHTML = "<p>No se pudieron cargar las solicitudes.</p>";
+            return;
+        }
+
+        mostrarHistorial(json.data);
+
+    } catch (err) {
+        document.getElementById("solicitudesContainer").innerHTML = "<p>Error de conexión con el servidor.</p>";
+    }
 }
 
-// -----------------------------------------------------
-// Crear tarjetas visuales
-// -----------------------------------------------------
-function mostrarSolicitudes(lista) {
-    const cont = document.getElementById("contenedorSolicitudes");
-    cont.innerHTML = "";
+// Mostrar las solicitudes en la página
+function mostrarHistorial(solicitudes) {
+    const container = document.getElementById("solicitudesContainer");
+    container.innerHTML = "";
 
-    if (lista.length === 0) {
-        cont.innerHTML = "<p>No tienes solicitudes registradas.</p>";
+    if (solicitudes.length === 0) {
+        container.innerHTML = "<p>No hay solicitudes registradas.</p>";
         return;
     }
 
-    lista.forEach(s => {
-        const estadoClase = s.estado.toLowerCase() === "entregada" ? "entregada" : "pendiente";
+    solicitudes.forEach(sol => {
+        const box = document.createElement("div");
+        box.className = "box";
 
-        const card = document.createElement("div");
-        card.className = "card";
+        const estadoClass = sol.estado === "Pendiente" ? "estado-pendiente" : "estado-entregado";
 
-        card.innerHTML = `
-            <div class="card-header" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                <h3>Solicitud #${s.id}</h3>
-                <span class="estado ${estadoClase}">${s.estado}</span>
-            </div>
-
-            <div class="card-body hidden">
-                <p><b>Docente:</b> ${s.docente}</p>
-                <p><b>Asignatura:</b> ${s.asignatura}</p>
-                <p><b>Fecha:</b> ${s.fecha}</p>
-
-                <div class="materiales">
-                    <b>Materiales Solicitados:</b>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Material</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${s.materiales.map(m => `
-                                <tr>
-                                    <td>${m.material}</td>
-                                    <td>${m.cantidad}</td>
-                                </tr>
-                            `).join("")}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        let html = `
+            <div class="solicitud-header">Solicitud #${sol.id} – <span class="${estadoClass}">${sol.estado}</span></div>
+            <p><b>Docente:</b> ${sol.docente}</p>
+            <p><b>Asignatura:</b> ${sol.asignatura}</p>
+            <p><b>Fecha:</b> ${new Date(sol.fecha).toLocaleString()}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
-        cont.appendChild(card);
+        sol.materiales.forEach(mat => {
+            html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
+        });
+
+        html += `</tbody></table>`;
+        box.innerHTML = html;
+
+        container.appendChild(box);
     });
 }
 
-// Ocultar elementos al inicio
-document.addEventListener("DOMContentLoaded", () => {
-    const style = document.createElement("style");
-    style.innerHTML = ".hidden { display: none; }";
-    document.body.appendChild(style);
-});
-
-// Iniciar carga
+// Ejecutar al cargar
 cargarHistorial();
 </script>
 
