@@ -6,30 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { 
-            font-family: Arial; 
+            font-family: Arial, sans-serif; 
             background: #f5f5f5; 
+            margin: 0; 
             padding: 20px;
-            margin: 0;
         }
         .box {
-            background: white; padding: 20px; width: 100%;
-            max-width: 420px; margin: auto; margin-top: 20px;
-            border-radius: 12px; box-shadow: 0 0 10px #ccc;
+            background: white;
+            padding: 20px;
+            max-width: 450px;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.15);
         }
+        h2, h3 { text-align: center; margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
         input, select {
-            width: 100%; padding: 12px; margin: 8px 0 18px;
-            border-radius: 7px; border: 1px solid #aaa;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px;
+            border-radius: 7px;
+            border: 1px solid #aaa;
             font-size: 16px;
+            box-sizing: border-box;
         }
         button {
-            width: 100%; background: #007bff; color: white; padding: 12px;
-            border: none; border-radius: 7px; cursor: pointer;
-            font-size: 17px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
         }
-        button:hover { background: #0056b3; }
+        button:hover { opacity: 0.9; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
         .hidden { display: none; }
-        a { color: #007bff; cursor: pointer; }
+        a { color: #007bff; cursor: pointer; text-decoration: underline; }
         .error { color: red; font-size: 14px; margin-bottom: 10px; }
+        ul { padding-left: 18px; margin-top: -5px; }
     </style>
 </head>
 <body>
@@ -37,33 +54,22 @@
 <!-- BIENVENIDA -->
 <div class="box" id="welcomeBox">
     <h2>Bienvenido(a)</h2>
-
     <p>
         Esta es la plataforma de <b>solicitud de materiales e insumos</b> habilitada por 
         <b>pañol del área de Electricidad, Automatización y Robótica</b>, un espacio dedicado 
-        a la gestión y entrega de herramientas, instrumentos de medición, componentes 
-        electrónicos, insumos y material didáctico para el desarrollo de clases y proyectos.
+        a la gestión y entrega de herramientas, instrumentos de medición, componentes electrónicos, 
+        insumos y material didáctico para el desarrollo de clases y proyectos.
     </p>
-
     <h3>Consideraciones:</h3>
-    <ul style="padding-left: 18px; margin-top: -5px;">
-        <li>
-            Todo material facilitado por pañol debe regresar en las mismas condiciones. 
-            En caso de que un material o equipo presente fallas o ocurra algún incidente, 
-            se agradece informar a la brevedad.
-        </li>
-        <li>
-            Como respaldo físico, los estudiantes deberán entregar su 
-            <b>TNE</b> o <b>Cédula de Identidad vigente</b>.  
-            Dicho documento debe pertenecer al mismo alumno que realiza la solicitud.
-        </li>
-        <li>
-            Ante dudas o consultas, favor acercarse con nuestro Director o Coordinador de Carrera.
-        </li>
+    <ul>
+        <li>Todo material facilitado por pañol debe regresar en las mismas condiciones. 
+            Informe cualquier falla o incidente a la brevedad.</li>
+        <li>Como respaldo físico, los estudiantes deben entregar su <b>TNE</b> o 
+            <b>Cédula de Identidad vigente</b>, perteneciente al mismo alumno que realiza la solicitud.</li>
+        <li>Ante dudas o consultas, acercarse con el Director o Coordinador de Carrera.</li>
     </ul>
-
-    <button onclick="showLogin()">Iniciar Sesión</button><br><br>
-    <button onclick="showRegister()">Registrarse</button>
+    <button class="btn-primary" onclick="showLogin()">Iniciar Sesión</button>
+    <button class="btn-success" onclick="showRegister()">Registrarse</button>
 </div>
 
 <!-- LOGIN -->
@@ -71,7 +77,7 @@
     <h2>Iniciar Sesión</h2>
     <input type="email" placeholder="Correo" id="loginEmail">
     <input type="password" placeholder="Contraseña" id="loginPass">
-    <button onclick="login()">Ingresar</button>
+    <button class="btn-primary" onclick="login()">Ingresar</button>
     <p><a onclick="showRegister()">Registrarme</a></p>
     <p><a onclick="showWelcome()">Volver</a></p>
 </div>
@@ -79,12 +85,9 @@
 <!-- REGISTRO -->
 <div class="box hidden" id="registerBox">
     <h2>Registro</h2>
-
     <input type="text" id="regNombre" placeholder="Nombre Completo">
-
     <input type="text" id="regRut" placeholder="RUT (Ej: 12.345.678-5)">
     <p id="rutError" class="error"></p>
-
     <select id="regCarrera">
         <option value="">Seleccione una carrera</option>
         <option>Ingeniería Eléctrica</option>
@@ -96,13 +99,10 @@
         <option>Área Mecánica</option>
         <option>Otras Áreas</option>
     </select>
-
     <input type="tel" id="regTelefono" placeholder="Teléfono (Ej: +56911111111)">
     <input type="email" id="regEmail" placeholder="Correo">
     <input type="password" id="regPass" placeholder="Contraseña">
-
-    <button onclick="registrar()">Crear Cuenta</button>
-
+    <button class="btn-success" onclick="registrar()">Crear Cuenta</button>
     <p><a onclick="showLogin()">Ya tengo cuenta</a></p>
     <p><a onclick="showWelcome()">Volver</a></p>
 </div>
@@ -111,59 +111,31 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
 /* ------------------ CAMBIO DE PANTALLAS ------------------ */
-
 function hideAll() {
     welcomeBox.classList.add("hidden");
     loginBox.classList.add("hidden");
     registerBox.classList.add("hidden");
 }
-
 function showWelcome() { hideAll(); welcomeBox.classList.remove("hidden"); }
 function showLogin() { hideAll(); loginBox.classList.remove("hidden"); }
 function showRegister() { hideAll(); registerBox.classList.remove("hidden"); }
 
-
 /* ------------------ VALIDACIÓN DE RUT ------------------ */
-
-function limpiarRut(rut) {
-    return rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
-}
-
-function dvT(rut) {
-    let M = 0, S = 1;
-    for (; rut; rut = Math.floor(rut / 10))
-        S = (S + rut % 10 * (9 - M++ % 6)) % 11;
-    return S ? S - 1 : "K";
-}
-
+function limpiarRut(rut) { return rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase(); }
+function dvT(rut) { let M=0,S=1; for(;rut;rut=Math.floor(rut/10)) S=(S+rut%10*(9-M++%6))%11; return S?S-1:"K"; }
 function validarRutCompleto(rutCompleto) {
-    if (!rutCompleto) return { ok: false, msg: "Debe ingresar un RUT." };
-
+    if(!rutCompleto) return {ok:false,msg:"Debe ingresar un RUT."};
     const r = limpiarRut(rutCompleto);
-
-    if (!r.includes("-")) return { ok: false, msg: "El RUT debe contener guion." };
-
-    const [num, dv] = r.split("-");
-
-    if (!/^\d+$/.test(num)) return { ok: false, msg: "La parte numérica debe ser solo números." };
-
-    const dvCorrecto = dvT(parseInt(num, 10)).toString();
-
-    if (dv.toUpperCase() !== dvCorrecto) return { ok: false, msg: "Dígito verificador incorrecto." };
-
-    return { ok: true };
+    if(!r.includes("-")) return {ok:false,msg:"El RUT debe contener guion."};
+    const [num,dv] = r.split("-");
+    if(!/^\d+$/.test(num)) return {ok:false,msg:"La parte numérica debe ser solo números."};
+    return {ok: dvT(parseInt(num,10)).toString()===dv.toUpperCase()};
 }
+function clearRutError() { rutError.textContent = ""; }
 
-function clearRutError() {
-    document.getElementById("rutError").textContent = "";
-}
-
-
-/* ------------------ REGISTRO (BACKEND) ------------------ */
-
+/* ------------------ REGISTRO ------------------ */
 async function registrar() {
     clearRutError();
-
     const data = {
         action: "register",
         nombre: regNombre.value.trim(),
@@ -173,83 +145,40 @@ async function registrar() {
         email: regEmail.value.trim(),
         pass: regPass.value.trim()
     };
-
-    if (!data.nombre || !data.rut || !data.carrera || !data.telefono || !data.email || !data.pass) {
-        alert("Complete todos los campos.");
-        return;
+    if(!data.nombre||!data.rut||!data.carrera||!data.telefono||!data.email||!data.pass){
+        alert("Complete todos los campos."); return;
     }
-
     const rutVal = validarRutCompleto(data.rut);
-    if (!rutVal.ok) {
-        rutError.textContent = rutVal.msg;
-        return;
-    }
-
-    if (!/^\+569\d{8}$/.test(data.telefono)) {
-        alert("Teléfono inválido. Formato correcto: +569xxxxxxxx");
-        return;
-    }
-
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify(data)
-        });
+    if(!rutVal.ok){ rutError.textContent = rutVal.msg; return; }
+    if(!/^\+569\d{8}$/.test(data.telefono)){ alert("Teléfono inválido. Formato correcto: +569xxxxxxxx"); return; }
+    try{
+        const res = await fetch(API_URL,{method:"POST",body:JSON.stringify(data)});
         const json = await res.json();
-
-        if (!json.ok) {
-            alert("Error: " + json.msg);
-            return;
-        }
-
+        if(!json.ok){ alert("Error: "+json.msg); return; }
         alert("✅ Registro exitoso. Ahora puede iniciar sesión.");
         showLogin();
-
-    } catch (err) {
-        alert("Error de conexión con el servidor.");
-    }
+    }catch(err){ alert("Error de conexión con el servidor."); }
 }
 
-
-/* ------------------ LOGIN (BACKEND) ------------------ */
-
+/* ------------------ LOGIN ------------------ */
 async function login() {
-    const data = {
-        action: "login",
-        email: loginEmail.value.trim(),
-        pass: loginPass.value.trim()
-    };
-
-    if (!data.email || !data.pass) {
-        alert("Complete todos los campos.");
-        return;
-    }
-
-    try {
-        const res = await fetch(API_URL + "?action=login&email=" + data.email + "&pass=" + data.pass);
+    const data={action:"login",email:loginEmail.value.trim(),pass:loginPass.value.trim()};
+    if(!data.email||!data.pass){ alert("Complete todos los campos."); return; }
+    try{
+        const res = await fetch(`${API_URL}?action=login&email=${data.email}&pass=${data.pass}`);
         const json = await res.json();
-
-        if (!json.ok) {
-            alert("❌ " + json.msg);
-            return;
-        }
-
-        // Guardar usuario temporalmente
-        localStorage.setItem("currentUser", JSON.stringify(json.data));
-
-        window.location.href = "menu.html";
-
-    } catch (err) {
-        alert("Error de conexión.");
-    }
+        if(!json.ok){ alert("❌ "+json.msg); return; }
+        localStorage.setItem("currentUser",JSON.stringify(json.data));
+        window.location.href="menu.html";
+    }catch(err){ alert("Error de conexión."); }
 }
 
-
-// PANTALLA INICIAL
+// Mostrar pantalla de bienvenida al cargar
 showWelcome();
 </script>
 
 </body>
 </html>
+
 
 
