@@ -8,135 +8,135 @@
         body {
             font-family: Arial;
             background: #f0f2f5;
-            padding: 10px;
             margin: 0;
+            padding: 20px;
         }
         .box {
             background: white;
-            padding: 15px;
-            max-width: 700px;
-            margin: auto;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.15);
-            margin-bottom: 15px;
+            max-width: 750px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
-        h2 { text-align: center; margin-bottom: 15px; }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .solicitud {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 5px solid #007bff;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .solicitud.completed {
+            border-left-color: #28a745;
+            opacity: 0.85;
+        }
+        .solicitud h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-bottom: 12px;
         }
         th, td {
             border: 1px solid #ccc;
             padding: 8px;
             font-size: 14px;
-            text-align: left;
         }
-        th { background: #007bff; color: white; }
+        th {
+            background: #007bff;
+            color: white;
+        }
         .btnVolver {
             background: #6c757d;
-            color: white;
-            border: none;
             padding: 12px;
             width: 100%;
-            border-radius: 8px;
+            border: none;
+            border-radius: 6px;
+            color: white;
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
         }
         .btnVolver:hover { background: #565e64; }
-        .solicitud-header {
-            font-weight: bold;
-            margin-top: 10px;
+
+        @media (max-width: 480px) {
+            table, th, td {
+                font-size: 12px;
+            }
+            .solicitud h3 {
+                font-size: 14px;
+            }
         }
-        .estado-pendiente { color: orange; font-weight: bold; }
-        .estado-entregado { color: green; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h2>Historial de Solicitudes</h2>
-    <div id="solicitudesContainer">
+    <div id="historialContainer">
         <p>Cargando solicitudes...</p>
     </div>
-    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
+
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
-// Cargar solicitudes del usuario actual
 async function cargarHistorial() {
     const user = JSON.parse(localStorage.getItem("currentUser"));
     if (!user) {
-        alert("No se encontró usuario activo.");
-        location.href = "index.html";
+        alert("Usuario no identificado.");
+        window.location.href = "index.html";
         return;
     }
 
     try {
-        const res = await fetch(`${API_URL}?action=getSolicitudes&email=${encodeURIComponent(user.email)}`);
+        const res = await fetch(API_URL + "?action=getHistorial&email=" + encodeURIComponent(user.email));
         const json = await res.json();
 
-        if (!json.ok) {
-            document.getElementById("solicitudesContainer").innerHTML = "<p>No se pudieron cargar las solicitudes.</p>";
+        const container = document.getElementById("historialContainer");
+        container.innerHTML = "";
+
+        if (!json.ok || json.data.length === 0) {
+            container.innerHTML = "<p>No hay solicitudes registradas.</p>";
             return;
         }
 
-        mostrarHistorial(json.data);
+        json.data.forEach(solicitud => {
+            const div = document.createElement("div");
+            div.className = "solicitud";
+            if(solicitud.estado === "Entregado") div.classList.add("completed");
 
-    } catch (err) {
-        document.getElementById("solicitudesContainer").innerHTML = "<p>Error de conexión con el servidor.</p>";
-    }
-}
+            let html = `<h3>Solicitud #${solicitud.id} – Estado: ${solicitud.estado}</h3>`;
+            html += `<p><b>Docente:</b> ${solicitud.docente} | <b>Asignatura:</b> ${solicitud.asignatura} | <b>Fecha:</b> ${new Date(solicitud.fecha).toLocaleString()}</p>`;
+            html += "<table><thead><tr><th>Material</th><th>Cantidad</th></tr></thead><tbody>";
+            solicitud.materiales.forEach(m => {
+                html += `<tr><td>${m.nombre}</td><td>${m.cantidad}</td></tr>`;
+            });
+            html += "</tbody></table>";
 
-// Mostrar las solicitudes en la página
-function mostrarHistorial(solicitudes) {
-    const container = document.getElementById("solicitudesContainer");
-    container.innerHTML = "";
-
-    if (solicitudes.length === 0) {
-        container.innerHTML = "<p>No hay solicitudes registradas.</p>";
-        return;
-    }
-
-    solicitudes.forEach(sol => {
-        const box = document.createElement("div");
-        box.className = "box";
-
-        const estadoClass = sol.estado === "Pendiente" ? "estado-pendiente" : "estado-entregado";
-
-        let html = `
-            <div class="solicitud-header">Solicitud #${sol.id} – <span class="${estadoClass}">${sol.estado}</span></div>
-            <p><b>Docente:</b> ${sol.docente}</p>
-            <p><b>Asignatura:</b> ${sol.asignatura}</p>
-            <p><b>Fecha:</b> ${new Date(sol.fecha).toLocaleString()}</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Material</th>
-                        <th>Cantidad</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        sol.materiales.forEach(mat => {
-            html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
+            div.innerHTML = html;
+            container.appendChild(div);
         });
 
-        html += `</tbody></table>`;
-        box.innerHTML = html;
-
-        container.appendChild(box);
-    });
+    } catch (err) {
+        alert("Error al cargar el historial.");
+        console.error(err);
+    }
 }
 
-// Ejecutar al cargar
+// Cargar historial al abrir la página
 cargarHistorial();
 </script>
 
 </body>
 </html>
+
 
