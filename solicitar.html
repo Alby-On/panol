@@ -2,27 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Solicitar Materiales</title>
+    <title>Solicitud de Materiales</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #f0f2f5;
-            padding: 20px;
             margin: 0;
+            padding: 20px;
         }
         .box {
             background: white;
             padding: 20px;
-            width: 100%;
             max-width: 750px;
-            margin: auto;
-            margin-top: 10px;
+            margin: 20px auto;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
-        h2 { text-align: center; }
-
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            box-sizing: border-box;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -41,50 +52,25 @@
             width: 100%;
             padding: 7px;
             font-size: 14px;
+            box-sizing: border-box;
         }
-        .btnAdd, .btnRemove {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 10px;
+        .btnAdd, .btnRemove, .btnEnviar, .btnVolver {
             width: 100%;
-            margin-top: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 15px;
-        }
-        .btnRemove { background: #dc3545; }
-        .btnEnviar {
-            background: #28a745;
-            margin-top: 15px;
             padding: 12px;
-            width: 100%;
             border: none;
-            color: white;
             border-radius: 6px;
-            font-size: 17px;
+            font-size: 16px;
             cursor: pointer;
-        }
-        .btnVolver {
-            background: #6c757d;
             margin-top: 10px;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            color: white;
-            border-radius: 6px;
-            font-size: 17px;
-            cursor: pointer;
         }
-        select, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 15px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #aaa;
-        }
+        .btnAdd { background: #17a2b8; color: white; }
+        .btnRemove { background: #dc3545; color: white; }
+        .btnEnviar { background: #28a745; color: white; }
+        .btnVolver { background: #6c757d; color: white; }
+        .btnAdd:hover { background: #138496; }
+        .btnRemove:hover { background: #c82333; }
+        .btnEnviar:hover { background: #218838; }
+        .btnVolver:hover { background: #565e64; }
     </style>
 </head>
 <body>
@@ -92,7 +78,7 @@
 <div class="box">
     <h2>Solicitud de Materiales</h2>
 
-    <label><b>Docente a cargo:</b></label>
+    <label>Docente a cargo:</label>
     <select id="docente">
         <option value="">Seleccione un docente</option>
         <option>AARÓN EDUARDO SEPÚLVEDA MEDINA</option>
@@ -119,7 +105,7 @@
         <option>OTROS DOCENTES</option>
     </select>
 
-    <label><b>Asignatura:</b></label>
+    <label>Asignatura:</label>
     <input type="text" id="asignatura" placeholder="Ej: Instalaciones Eléctricas II">
 
     <h3>Materiales Solicitados</h3>
@@ -141,19 +127,16 @@
 
     <button class="btnAdd" onclick="addRow()">➕ Agregar Material</button>
     <button class="btnRemove" onclick="removeRow()">➖ Eliminar Último</button>
-
     <button class="btnEnviar" onclick="enviar()">Enviar Solicitud</button>
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9iIEMVaXWn-hMuixLg-XlsNTnLsbuX-jgW9VhBMOmg/exec";
 
 /* ----------- VERIFICAR USUARIO LOGEADO ----------- */
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) {
-    window.location.href = "index.html";
-}
+if (!user) window.location.href = "index.html";
 
 /* ----------- AGREGAR FILA ----------- */
 function addRow() {
@@ -168,11 +151,8 @@ function addRow() {
 /* ----------- ELIMINAR ÚLTIMA FILA ----------- */
 function removeRow() {
     const tbody = document.getElementById("tbody");
-    if (tbody.rows.length > 1) {
-        tbody.deleteRow(tbody.rows.length - 1);
-    } else {
-        alert("Debe haber al menos un material.");
-    }
+    if (tbody.rows.length > 1) tbody.deleteRow(tbody.rows.length - 1);
+    else alert("Debe haber al menos un material.");
 }
 
 /* ----------- ENVIAR SOLICITUD AL BACKEND ----------- */
@@ -189,15 +169,10 @@ async function enviar() {
     filas.forEach(f => {
         const nombre = f.children[0].querySelector("input").value.trim();
         const cantidad = f.children[1].querySelector("input").value.trim();
-        if (nombre && cantidad) {
-            materiales.push({ nombre, cantidad });
-        }
+        if (nombre && cantidad) materiales.push({ nombre, cantidad });
     });
 
-    if (materiales.length === 0) {
-        alert("Debe ingresar al menos un material.");
-        return;
-    }
+    if (materiales.length === 0) { alert("Debe ingresar al menos un material."); return; }
 
     const data = {
         action: "nuevaSolicitud",
@@ -212,13 +187,8 @@ async function enviar() {
             method: "POST",
             body: JSON.stringify(data)
         });
-
         const json = await res.json();
-
-        if (!json.ok) {
-            alert("Error: " + json.msg);
-            return;
-        }
+        if (!json.ok) { alert("Error: " + json.msg); return; }
 
         alert("✅ Solicitud enviada con éxito.");
         location.href = "menu.html";
