@@ -5,18 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Historial de Solicitudes</title>
 <style>
-    body { font-family: Arial; background: #f5f5f5; padding: 10px; margin: 0; }
-    .box { background: white; padding: 20px; border-radius: 12px; max-width: 600px; margin: 20px auto; box-shadow: 0 0 10px #ccc; }
-    h2 { text-align: center; margin-bottom: 20px; }
-    .filtro { margin-bottom: 15px; }
-    input[type="date"] { width: 100%; padding: 10px; border-radius: 7px; border: 1px solid #aaa; margin-bottom: 10px; }
-    .solicitud { border-left: 5px solid #28a745; background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
-    .solicitud h3 { margin: 0 0 10px 0; font-size: 18px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { border: 1px solid #ccc; padding: 8px; font-size: 14px; }
-    th { background: #28a745; color: white; }
-    .btnVolver { background: #6c757d; color: white; border: none; width: 100%; padding: 12px; border-radius: 7px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-    .btnVolver:hover { background: #565e64; }
+body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+.box { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+h2 { text-align: center; margin-bottom: 15px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+th { background: #007bff; color: white; }
+button { padding: 8px 12px; border: none; border-radius: 5px; background: #28a745; color: white; cursor: pointer; font-size: 14px; margin-top: 5px; }
+button:hover { background: #218838; }
+.materiales { margin-top: 8px; font-size: 14px; }
+label { font-weight: bold; font-size: 14px; }
+input[type="date"] { padding: 6px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #aaa; width: 100%; }
 </style>
 </head>
 <body>
@@ -24,104 +23,83 @@
 <div class="box">
     <h2>Historial de Solicitudes Entregadas</h2>
 
-    <div class="filtro">
-        <label for="fechaInicio">Fecha inicio:</label>
-        <input type="date" id="fechaInicio">
-        <label for="fechaFin">Fecha fin:</label>
-        <input type="date" id="fechaFin">
-        <button onclick="filtrar()">Filtrar</button>
-    </div>
+    <label>Filtrar por fecha:</label>
+    <input type="date" id="fechaFiltro">
 
-    <div id="historialContainer">
-        <p>Cargando historial...</p>
-    </div>
+    <div id="historialContainer">Cargando historial...</div>
 
-    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
+    <button onclick="location.href='menu.html'">Volver al Menú</button>
 </div>
 
 <script>
-const API_URL = "TU_URL_DEL_APPS_SCRIPT"; // reemplaza con tu URL
-const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
 
-async function cargarHistorial() {
-    const container = document.getElementById("historialContainer");
-    container.innerHTML = "<p>Cargando historial...</p>";
-
-    try {
-        const res = await fetch(API_URL + "?action=getHistorial&email=" + currentUser.email);
-        const json = await res.json();
-
-        if (!json.ok) {
-            container.innerHTML = "<p>" + json.msg + "</p>";
-            return;
-        }
-
-        mostrarSolicitudes(json.data);
-
-    } catch (err) {
-        container.innerHTML = "<p>Error al cargar historial.</p>";
-    }
-}
-
-function mostrarSolicitudes(solicitudes) {
+function mostrarHistorial(data) {
     const container = document.getElementById("historialContainer");
     container.innerHTML = "";
 
-    if (solicitudes.length === 0) {
+    const fechaFiltro = document.getElementById("fechaFiltro").value;
+    let filtradas = data;
+
+    if (fechaFiltro) {
+        filtradas = data.filter(s => new Date(s.fecha).toISOString().split('T')[0] === fechaFiltro);
+    }
+
+    if (filtradas.length === 0) {
         container.innerHTML = "<p>No hay solicitudes entregadas.</p>";
         return;
     }
 
-    solicitudes.forEach(sol => {
+    filtradas.forEach(solicitud => {
         const div = document.createElement("div");
-        div.className = "solicitud";
-
-        let fecha = new Date(sol.fecha);
-        let fechaStr = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
-
-        let html = `<h3>Solicitud #${sol.id} - ${fechaStr}</h3>
-                    <p><b>Docente:</b> ${sol.docente}</p>
-                    <p><b>Asignatura:</b> ${sol.asignatura}</p>
-                    <table>
-                        <thead>
-                            <tr><th>Material</th><th>Cantidad</th></tr>
-                        </thead>
-                        <tbody>`;
-        sol.materiales.forEach(mat => {
-            html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
-        });
-        html += "</tbody></table>";
-
-        div.innerHTML = html;
+        div.style.border = "1px solid #007bff";
+        div.style.borderRadius = "8px";
+        div.style.padding = "10px";
+        div.style.marginBottom = "10px";
+        div.innerHTML = `
+            <p><b>ID:</b> ${solicitud.id}</p>
+            <p><b>Docente:</b> ${solicitud.docente}</p>
+            <p><b>Asignatura:</b> ${solicitud.asignatura}</p>
+            <p><b>Fecha:</b> ${new Date(solicitud.fecha).toLocaleString()}</p>
+            <p><b>Materiales:</b></p>
+            <ul class="materiales">
+                ${solicitud.materiales.map(m => `<li>${m.nombre} - Cantidad: ${m.cantidad}</li>`).join('')}
+            </ul>
+        `;
         container.appendChild(div);
     });
 }
 
-function filtrar() {
-    const inicio = document.getElementById("fechaInicio").value;
-    const fin = document.getElementById("fechaFin").value;
+async function cargarHistorial() {
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    if (!user) {
+        alert("No hay usuario logueado.");
+        window.location.href = "index.html";
+        return;
+    }
 
-    const container = document.getElementById("historialContainer");
-    const solicitudes = Array.from(container.querySelectorAll(".solicitud"));
+    try {
+        const res = await fetch(`${API_URL}?action=getHistorial&email=${user.email}`);
+        const json = await res.json();
 
-    solicitudes.forEach(div => {
-        let fechaText = div.querySelector("h3").textContent;
-        let fecha = new Date(fechaText.split(" - ")[1]);
+        if (!json.ok) {
+            document.getElementById("historialContainer").innerHTML = "<p>Error al cargar historial.</p>";
+            return;
+        }
 
-        let mostrar = true;
-        if (inicio) mostrar = mostrar && (fecha >= new Date(inicio));
-        if (fin) mostrar = mostrar && (fecha <= new Date(fin));
-
-        div.style.display = mostrar ? "block" : "none";
-    });
+        mostrarHistorial(json.data);
+    } catch (err) {
+        document.getElementById("historialContainer").innerHTML = "<p>Error al cargar historial.</p>";
+    }
 }
 
-// Carga inicial
+document.getElementById("fechaFiltro").addEventListener("change", cargarHistorial);
 cargarHistorial();
 </script>
 
 </body>
 </html>
+
 
 
 
