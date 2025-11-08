@@ -2,122 +2,133 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Historial de Solicitudes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-    body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 15px; }
-    .box { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
-    h2 { text-align: center; margin-bottom: 15px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 10px; font-size: 14px; }
-    th { background: #007bff; color: white; }
-    .materials { background: #f8f9fa; }
-    .materials td { padding-left: 30px; font-size: 13px; }
-    .btnToggle { background: none; border: none; color: #007bff; cursor: pointer; font-size: 14px; }
-    .btnVolver { background: #6c757d; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin-top: 15px; font-size: 16px; }
+    body {
+        font-family: Arial;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 15px;
+    }
+    .box {
+        background: white;
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 12px #ccc;
+        margin-bottom: 20px;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        font-size: 14px;
+        text-align: left;
+    }
+    th {
+        background: #007bff;
+        color: white;
+    }
+    .btnVolver {
+        background: #6c757d;
+        padding: 12px;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
     .btnVolver:hover { background: #565e64; }
-    @media (max-width: 500px) { th, td { font-size: 12px; padding: 8px; } }
+    .solicitud-header {
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
 
 <div class="box">
     <h2>Historial de Solicitudes Entregadas</h2>
-
-    <table id="historialTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Docente</th>
-                <th>Asignatura</th>
-                <th>Fecha</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td colspan="5" style="text-align:center;">Cargando historial...</td></tr>
-        </tbody>
-    </table>
-
-    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+    <div id="historialContainer">
+        <p>Cargando historial...</p>
+    </div>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec"; // reemplaza con tu URL real
+const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec"; // reemplaza con tu URL del Apps Script
 
+// Cargar historial del usuario logueado
 async function cargarHistorial() {
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    const tbody = document.querySelector("#historialTable tbody");
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando historial...</td></tr>';
-
     if (!user) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Usuario no encontrado. Inicie sesión.</td></tr>';
+        alert("Usuario no encontrado. Inicie sesión nuevamente.");
+        location.href = "index.html";
         return;
     }
 
     try {
-        const res = await fetch(`${API_URL}?action=getSolicitudes&email=${user.email}`);
+        const res = await fetch(`${API_URL}?action=getHistorial&email=${encodeURIComponent(user.email)}`);
         const json = await res.json();
 
-        if (!json.ok || !json.data || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay solicitudes registradas.</td></tr>';
+        const container = document.getElementById("historialContainer");
+        container.innerHTML = "";
+
+        if (!json.ok || json.data.length === 0) {
+            container.innerHTML = "<p>No hay solicitudes entregadas.</p>";
             return;
         }
 
-        // Filtrar solo entregadas
-        const entregadas = json.data.filter(s => s.estado === "Entregado");
+        json.data.forEach(solicitud => {
+            const div = document.createElement("div");
+            div.className = "solicitud-box";
+            div.style.marginBottom = "15px";
+            div.style.padding = "12px";
+            div.style.border = "1px solid #ccc";
+            div.style.borderRadius = "8px";
+            div.style.background = "#f8f9fa";
 
-        if (entregadas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay solicitudes entregadas.</td></tr>';
-            return;
-        }
+            let html = `<div class="solicitud-header">Solicitud #${solicitud.id} - ${solicitud.fecha}</div>`;
+            html += `<p><b>Docente:</b> ${solicitud.docente}</p>`;
+            html += `<p><b>Asignatura:</b> ${solicitud.asignatura}</p>`;
 
-        mostrarSolicitudes(entregadas);
+            html += `<table>
+                        <thead>
+                            <tr><th>Material</th><th>Cantidad</th></tr>
+                        </thead>
+                        <tbody>`;
+            solicitud.materiales.forEach(mat => {
+                html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+
+            div.innerHTML = html;
+            container.appendChild(div);
+        });
+
     } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error al cargar historial.</td></tr>';
         console.error(err);
+        document.getElementById("historialContainer").innerHTML = "<p>Error al cargar historial.</p>";
     }
 }
 
-function mostrarSolicitudes(solicitudes) {
-    const tbody = document.querySelector("#historialTable tbody");
-    tbody.innerHTML = "";
-
-    solicitudes.forEach(s => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${s.id}</td>
-            <td>${s.docente}</td>
-            <td>${s.asignatura}</td>
-            <td>${new Date(s.fecha).toLocaleDateString()}</td>
-            <td><button class="btnToggle" onclick="toggleMaterials(this)">Ver Materiales</button></td>
-        `;
-        tbody.appendChild(tr);
-
-        // Fila oculta para materiales
-        const matTr = document.createElement("tr");
-        matTr.classList.add("materials");
-        matTr.style.display = "none";
-        const matTd = document.createElement("td");
-        matTd.colSpan = 5;
-        matTd.innerHTML = s.materiales.map(m => `${m.nombre} (Cantidad: ${m.cantidad})`).join("<br>");
-        matTr.appendChild(matTd);
-        tbody.appendChild(matTr);
-    });
-}
-
-function toggleMaterials(button) {
-    const tr = button.parentElement.parentElement;
-    const nextTr = tr.nextElementSibling;
-    if (nextTr && nextTr.classList.contains("materials")) {
-        nextTr.style.display = nextTr.style.display === "none" ? "" : "none";
-    }
-}
-
+// Ejecutar al cargar la página
 cargarHistorial();
 </script>
 
 </body>
 </html>
+
 
 
