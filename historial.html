@@ -2,100 +2,127 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Historial de Solicitudes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial de Solicitudes</title>
 <style>
-    body { font-family: Arial; background: #f0f2f5; margin:0; padding:20px;}
-    .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px #ccc; max-width: 600px; margin:auto; margin-top:20px;}
-    h2 { text-align:center; margin-bottom:20px;}
-    .filtro { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;}
-    input[type="date"], button { flex:1; padding:10px; border-radius:6px; border:1px solid #aaa; font-size:14px;}
-    button { background:#007bff; color:white; border:none; cursor:pointer;}
-    button:hover { background:#0056b3;}
-    .solicitud { border-left:5px solid #28a745; background:#f8f9fa; padding:10px; margin-bottom:12px; border-radius:6px;}
-    .solicitud h3 { margin:0; cursor:pointer;}
-    table { width:100%; border-collapse:collapse; margin-top:10px;}
-    th, td { border:1px solid #ccc; padding:8px; text-align:left;}
-    th { background:#007bff; color:white;}
-    .hidden { display:none;}
+    body { font-family: Arial; background: #f5f5f5; padding: 10px; margin: 0; }
+    .box { background: white; padding: 20px; border-radius: 12px; max-width: 600px; margin: 20px auto; box-shadow: 0 0 10px #ccc; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    .filtro { margin-bottom: 15px; }
+    input[type="date"] { width: 100%; padding: 10px; border-radius: 7px; border: 1px solid #aaa; margin-bottom: 10px; }
+    .solicitud { border-left: 5px solid #28a745; background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+    .solicitud h3 { margin: 0 0 10px 0; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #ccc; padding: 8px; font-size: 14px; }
+    th { background: #28a745; color: white; }
+    .btnVolver { background: #6c757d; color: white; border: none; width: 100%; padding: 12px; border-radius: 7px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btnVolver:hover { background: #565e64; }
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Historial de Solicitudes</h2>
+    <h2>Historial de Solicitudes Entregadas</h2>
 
     <div class="filtro">
+        <label for="fechaInicio">Fecha inicio:</label>
         <input type="date" id="fechaInicio">
+        <label for="fechaFin">Fecha fin:</label>
         <input type="date" id="fechaFin">
-        <button onclick="cargarHistorial()">Filtrar</button>
+        <button onclick="filtrar()">Filtrar</button>
     </div>
 
-    <div id="historialContenedor">Cargando historial...</div>
-    <button onclick="location.href='menu.html'" style="margin-top:15px;">Volver al Menú</button>
+    <div id="historialContainer">
+        <p>Cargando historial...</p>
+    </div>
+
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec"; // Reemplaza con tu URL de Apps Script
-
-function crearSolicitudHTML(solicitud) {
-    let html = `<div class="solicitud">
-        <h3 onclick="toggleDetalles('${solicitud.id}')">Solicitud #${solicitud.id} - ${solicitud.fecha} - ${solicitud.asignatura} (${solicitud.docente})</h3>
-        <div id="detalles-${solicitud.id}" class="hidden">
-            <table>
-                <thead><tr><th>Material</th><th>Cantidad</th></tr></thead><tbody>`;
-    solicitud.materiales.forEach(m => {
-        html += `<tr><td>${m.nombre}</td><td>${m.cantidad}</td></tr>`;
-    });
-    html += `</tbody></table></div></div>`;
-    return html;
-}
-
-function toggleDetalles(id) {
-    const elem = document.getElementById(`detalles-${id}`);
-    elem.classList.toggle("hidden");
-}
+const API_URL = "TU_URL_DEL_APPS_SCRIPT"; // reemplaza con tu URL
+const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
 
 async function cargarHistorial() {
-    const contenedor = document.getElementById("historialContenedor");
-    contenedor.innerHTML = "Cargando historial...";
-
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!user) { contenedor.innerHTML = "Usuario no identificado."; return; }
-
-    const fechaInicio = document.getElementById("fechaInicio").value;
-    const fechaFin = document.getElementById("fechaFin").value;
-
-    const params = new URLSearchParams({ 
-        action: "getHistorial", 
-        email: user.email,
-        fechaInicio: fechaInicio,
-        fechaFin: fechaFin
-    });
+    const container = document.getElementById("historialContainer");
+    container.innerHTML = "<p>Cargando historial...</p>";
 
     try {
-        const res = await fetch(API_URL + "?" + params.toString());
+        const res = await fetch(API_URL + "?action=getHistorial&email=" + currentUser.email);
         const json = await res.json();
-        if (!json.ok) { contenedor.innerHTML = "Error al cargar historial."; return; }
 
-        if (json.data.length === 0) { contenedor.innerHTML = "No hay solicitudes entregadas."; return; }
+        if (!json.ok) {
+            container.innerHTML = "<p>" + json.msg + "</p>";
+            return;
+        }
 
-        contenedor.innerHTML = "";
-        json.data.forEach(s => {
-            contenedor.innerHTML += crearSolicitudHTML(s);
-        });
+        mostrarSolicitudes(json.data);
 
-    } catch(err) {
-        contenedor.innerHTML = "Error de conexión con el servidor.";
+    } catch (err) {
+        container.innerHTML = "<p>Error al cargar historial.</p>";
     }
 }
 
-// Cargar historial al iniciar
+function mostrarSolicitudes(solicitudes) {
+    const container = document.getElementById("historialContainer");
+    container.innerHTML = "";
+
+    if (solicitudes.length === 0) {
+        container.innerHTML = "<p>No hay solicitudes entregadas.</p>";
+        return;
+    }
+
+    solicitudes.forEach(sol => {
+        const div = document.createElement("div");
+        div.className = "solicitud";
+
+        let fecha = new Date(sol.fecha);
+        let fechaStr = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
+
+        let html = `<h3>Solicitud #${sol.id} - ${fechaStr}</h3>
+                    <p><b>Docente:</b> ${sol.docente}</p>
+                    <p><b>Asignatura:</b> ${sol.asignatura}</p>
+                    <table>
+                        <thead>
+                            <tr><th>Material</th><th>Cantidad</th></tr>
+                        </thead>
+                        <tbody>`;
+        sol.materiales.forEach(mat => {
+            html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
+        });
+        html += "</tbody></table>";
+
+        div.innerHTML = html;
+        container.appendChild(div);
+    });
+}
+
+function filtrar() {
+    const inicio = document.getElementById("fechaInicio").value;
+    const fin = document.getElementById("fechaFin").value;
+
+    const container = document.getElementById("historialContainer");
+    const solicitudes = Array.from(container.querySelectorAll(".solicitud"));
+
+    solicitudes.forEach(div => {
+        let fechaText = div.querySelector("h3").textContent;
+        let fecha = new Date(fechaText.split(" - ")[1]);
+
+        let mostrar = true;
+        if (inicio) mostrar = mostrar && (fecha >= new Date(inicio));
+        if (fin) mostrar = mostrar && (fecha <= new Date(fin));
+
+        div.style.display = mostrar ? "block" : "none";
+    });
+}
+
+// Carga inicial
 cargarHistorial();
 </script>
 
 </body>
 </html>
+
 
 
 
