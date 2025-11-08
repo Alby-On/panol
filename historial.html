@@ -5,125 +5,92 @@
 <title>Historial de Solicitudes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-    body {
-        font-family: Arial;
-        background: #f5f5f5;
-        margin: 0;
-        padding: 15px;
-    }
-    .box {
-        background: white;
-        max-width: 600px;
-        margin: auto;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 12px #ccc;
-        margin-bottom: 20px;
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 10px;
-    }
-    th, td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        font-size: 14px;
-        text-align: left;
-    }
-    th {
-        background: #007bff;
-        color: white;
-    }
-    .btnVolver {
-        background: #6c757d;
-        padding: 12px;
-        width: 100%;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    .btnVolver:hover { background: #565e64; }
-    .solicitud-header {
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
+    body { font-family: Arial; background: #f0f2f5; margin:0; padding:20px;}
+    .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px #ccc; max-width: 600px; margin:auto; margin-top:20px;}
+    h2 { text-align:center; margin-bottom:20px;}
+    .filtro { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;}
+    input[type="date"], button { flex:1; padding:10px; border-radius:6px; border:1px solid #aaa; font-size:14px;}
+    button { background:#007bff; color:white; border:none; cursor:pointer;}
+    button:hover { background:#0056b3;}
+    .solicitud { border-left:5px solid #28a745; background:#f8f9fa; padding:10px; margin-bottom:12px; border-radius:6px;}
+    .solicitud h3 { margin:0; cursor:pointer;}
+    table { width:100%; border-collapse:collapse; margin-top:10px;}
+    th, td { border:1px solid #ccc; padding:8px; text-align:left;}
+    th { background:#007bff; color:white;}
+    .hidden { display:none;}
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Historial de Solicitudes Entregadas</h2>
-    <div id="historialContainer">
-        <p>Cargando historial...</p>
+    <h2>Historial de Solicitudes</h2>
+
+    <div class="filtro">
+        <input type="date" id="fechaInicio">
+        <input type="date" id="fechaFin">
+        <button onclick="cargarHistorial()">Filtrar</button>
     </div>
-    <button class="btnVolver" onclick="location.href='menu.html'">Volver al Menú</button>
+
+    <div id="historialContenedor">Cargando historial...</div>
+    <button onclick="location.href='menu.html'" style="margin-top:15px;">Volver al Menú</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec"; // reemplaza con tu URL del Apps Script
+const API_URL = "TU_URL_APPS_SCRIPT"; // Reemplaza con tu URL de Apps Script
 
-// Cargar historial del usuario logueado
+function crearSolicitudHTML(solicitud) {
+    let html = `<div class="solicitud">
+        <h3 onclick="toggleDetalles('${solicitud.id}')">Solicitud #${solicitud.id} - ${solicitud.fecha} - ${solicitud.asignatura} (${solicitud.docente})</h3>
+        <div id="detalles-${solicitud.id}" class="hidden">
+            <table>
+                <thead><tr><th>Material</th><th>Cantidad</th></tr></thead><tbody>`;
+    solicitud.materiales.forEach(m => {
+        html += `<tr><td>${m.nombre}</td><td>${m.cantidad}</td></tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    return html;
+}
+
+function toggleDetalles(id) {
+    const elem = document.getElementById(`detalles-${id}`);
+    elem.classList.toggle("hidden");
+}
+
 async function cargarHistorial() {
+    const contenedor = document.getElementById("historialContenedor");
+    contenedor.innerHTML = "Cargando historial...";
+
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!user) {
-        alert("Usuario no encontrado. Inicie sesión nuevamente.");
-        location.href = "index.html";
-        return;
-    }
+    if (!user) { contenedor.innerHTML = "Usuario no identificado."; return; }
+
+    const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFin = document.getElementById("fechaFin").value;
+
+    const params = new URLSearchParams({ 
+        action: "getHistorial", 
+        email: user.email,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin
+    });
 
     try {
-        const res = await fetch(`${API_URL}?action=getHistorial&email=${encodeURIComponent(user.email)}`);
+        const res = await fetch(API_URL + "?" + params.toString());
         const json = await res.json();
+        if (!json.ok) { contenedor.innerHTML = "Error al cargar historial."; return; }
 
-        const container = document.getElementById("historialContainer");
-        container.innerHTML = "";
+        if (json.data.length === 0) { contenedor.innerHTML = "No hay solicitudes entregadas."; return; }
 
-        if (!json.ok || json.data.length === 0) {
-            container.innerHTML = "<p>No hay solicitudes entregadas.</p>";
-            return;
-        }
-
-        json.data.forEach(solicitud => {
-            const div = document.createElement("div");
-            div.className = "solicitud-box";
-            div.style.marginBottom = "15px";
-            div.style.padding = "12px";
-            div.style.border = "1px solid #ccc";
-            div.style.borderRadius = "8px";
-            div.style.background = "#f8f9fa";
-
-            let html = `<div class="solicitud-header">Solicitud #${solicitud.id} - ${solicitud.fecha}</div>`;
-            html += `<p><b>Docente:</b> ${solicitud.docente}</p>`;
-            html += `<p><b>Asignatura:</b> ${solicitud.asignatura}</p>`;
-
-            html += `<table>
-                        <thead>
-                            <tr><th>Material</th><th>Cantidad</th></tr>
-                        </thead>
-                        <tbody>`;
-            solicitud.materiales.forEach(mat => {
-                html += `<tr><td>${mat.nombre}</td><td>${mat.cantidad}</td></tr>`;
-            });
-            html += `</tbody></table>`;
-
-            div.innerHTML = html;
-            container.appendChild(div);
+        contenedor.innerHTML = "";
+        json.data.forEach(s => {
+            contenedor.innerHTML += crearSolicitudHTML(s);
         });
 
-    } catch (err) {
-        console.error(err);
-        document.getElementById("historialContainer").innerHTML = "<p>Error al cargar historial.</p>";
+    } catch(err) {
+        contenedor.innerHTML = "Error de conexión con el servidor.";
     }
 }
 
-// Ejecutar al cargar la página
+// Cargar historial al iniciar
 cargarHistorial();
 </script>
 
