@@ -13,23 +13,38 @@
     }
     .box {
         background: white;
-        max-width: 750px;
+        max-width: 800px;
         margin: auto;
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0,0,0,0.15);
     }
-    h2 { text-align:center; }
+    h2 { text-align:center; margin-bottom: 20px; }
 
-    .solicitud {
+    table {
+        width: 100%;
+        border-collapse: collapse;
         margin-bottom: 20px;
-        padding: 15px;
-        border-left: 5px solid #17a2b8;
-        background: #f8f9fa;
-        border-radius: 8px;
     }
-
-    .solicitud h3 { margin: 0 0 10px 0; font-size: 18px; }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
+    }
+    th {
+        background: #17a2b8;
+        color: white;
+        text-align: center;
+    }
+    td button {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
 
     .btnVolver {
         background: #6c757d;
@@ -40,23 +55,12 @@
         color: white;
         font-size: 17px;
         cursor: pointer;
-        margin-top: 10px;
-    }
-
-    .btnMateriales {
-        background: #17a2b8;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 12px;
-        cursor: pointer;
-        margin-top: 8px;
     }
 
     .materiales {
         display: none;
-        margin-top: 10px;
-        padding: 10px;
+        margin-top: 5px;
+        padding: 8px;
         background: #f1f1f1;
         border-radius: 6px;
     }
@@ -67,41 +71,55 @@
 <div class="box">
     <h2>Historial de Solicitudes Entregadas</h2>
 
-    <!-- Solicitud de ejemplo 1 -->
-    <div class="solicitud">
-        <h3>Solicitud #101 – <b>Entregado</b></h3>
-        <p><b>Fecha:</b> 05/11/2025 14:30</p>
-        <p><b>Docente:</b> Juan Pérez</p>
-        <p><b>Asignatura:</b> Matemáticas</p>
-        <button class="btnMateriales" onclick="document.getElementById('mat1').style.display = (document.getElementById('mat1').style.display === 'block') ? 'none' : 'block';">
-            Ver Materiales
-        </button>
-        <div id="mat1" class="materiales">
-            • Lápices — <b>10</b><br>
-            • Cuadernos — <b>5</b>
-        </div>
-    </div>
-
-    <!-- Solicitud de ejemplo 2 -->
-    <div class="solicitud">
-        <h3>Solicitud #102 – <b>Entregado</b></h3>
-        <p><b>Fecha:</b> 06/11/2025 09:15</p>
-        <p><b>Docente:</b> María López</p>
-        <p><b>Asignatura:</b> Física</p>
-        <button class="btnMateriales" onclick="document.getElementById('mat2').style.display = (document.getElementById('mat2').style.display === 'block') ? 'none' : 'block';">
-            Ver Materiales
-        </button>
-        <div id="mat2" class="materiales">
-            • Reglas — <b>3</b><br>
-            • Calculadoras — <b>2</b>
-        </div>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Docente</th>
+                <th>Asignatura</th>
+                <th>Estado</th>
+                <th>Materiales</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>101</td>
+                <td>05/11/2025 14:30</td>
+                <td>Juan Pérez</td>
+                <td>Matemáticas</td>
+                <td>Entregado</td>
+                <td>
+                    <button onclick="document.getElementById('mat1').style.display = (document.getElementById('mat1').style.display === 'block') ? 'none' : 'block';">
+                        Ver
+                    </button>
+                    <div id="mat1" class="materiales">
+                        • Lápices — <b>10</b><br>
+                        • Cuadernos — <b>5</b>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>102</td>
+                <td>06/11/2025 09:15</td>
+                <td>María López</td>
+                <td>Física</td>
+                <td>Entregado</td>
+                <td>
+                    <button onclick="document.getElementById('mat2').style.display = (document.getElementById('mat2').style.display === 'block') ? 'none' : 'block';">
+                        Ver
+                    </button>
+                    <div id="mat2" class="materiales">
+                        • Reglas — <b>3</b><br>
+                        • Calculadoras — <b>2</b>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <button class="btnVolver" onclick="alert('Volviendo al menú...')">Volver</button>
 </div>
-
-</body>
-</html>
 
 </body>
 </html>
