@@ -106,7 +106,7 @@ async function cargarHistorial() {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Cargando historial...</td></tr>`;
 
     try {
-        const res = await fetch(`${API_URL}?action=getHistorial&email=${user.email}`);
+        const res = await fetch(`${https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec}?action=getHistorial&email=${user.email}`);
         const json = await res.json();
 
         if (!json.ok) {
