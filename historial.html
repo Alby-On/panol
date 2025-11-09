@@ -29,23 +29,27 @@
             margin-bottom: 12px;
             border: 1px solid #ddd;
         }
-        .btn {
+        .btnVer {
             width: 100%;
             padding: 10px;
             margin-top: 8px;
             border: none;
+            background: #17a2b8;
+            color: white;
             border-radius: 6px;
-            font-size: 16px;
             cursor: pointer;
+            font-size: 15px;
         }
-        .btnDetalle { background: #17a2b8; color: white; }
-        .btnVolver { background: #6c757d; color: white; margin-top: 15px; }
-        .materialBox {
-            background: #f7f7f7;
-            padding: 10px;
+        .btnVolver {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            background: #6c757d;
+            color: white;
             border-radius: 6px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -54,19 +58,19 @@
 <div class="box">
     <h2>Historial de Solicitudes</h2>
 
-    <div id="listado">Cargando historial...</div>
+    <div id="listado">Cargando solicitudes...</div>
 
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
+const API_URL = "TU_URL_WEBAPP_AQUI";
 
-// Usuario logeado
+// Verificar usuario
 const user = JSON.parse(localStorage.getItem("currentUser"));
 if (!user) location.href = "index.html";
 
-/* ------- Cargamos historial ------- */
+/* ------ Cargar historial SIMPLE ------ */
 async function cargarHistorial() {
     const cont = document.getElementById("listado");
 
@@ -74,12 +78,13 @@ async function cargarHistorial() {
         const res = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify({
-                action: "getHistorial",
+                action: "getHistorialSimple",
                 userEmail: user.email
             })
         });
 
         const json = await res.json();
+
         if (!json.ok) {
             cont.innerHTML = "Error al cargar historial.";
             return;
@@ -103,16 +108,11 @@ async function cargarHistorial() {
                 <b>Docente:</b> ${sol.docente}<br>
                 <b>Asignatura:</b> ${sol.asignatura}<br>
                 <b>Fecha:</b> ${sol.fecha}<br>
-                <b>Estado:</b> ${sol.estado}<br>
-                <button class="btn btnDetalle" onclick="toggleMateriales('${sol.id}')">
-                    Ver materiales
-                </button>
+                <b>Estado:</b> ${sol.estado}<br><br>
 
-                <div id="mat_${sol.id}" class="materialBox" style="display:none;">
-                    ${sol.materiales.map(m => `
-                        • ${m.material} — <b>${m.cantidad}</b><br>
-                    `).join("")}
-                </div>
+                <button class="btnVer" onclick="alert('Aquí mostraremos los materiales más adelante')">
+                    Ver detalles
+                </button>
             `;
 
             cont.appendChild(div);
@@ -123,14 +123,9 @@ async function cargarHistorial() {
     }
 }
 
-/* Mostrar / ocultar materiales */
-function toggleMateriales(id) {
-    const box = document.getElementById("mat_" + id);
-    box.style.display = box.style.display === "none" ? "block" : "none";
-}
-
 cargarHistorial();
 </script>
 
 </body>
 </html>
+
