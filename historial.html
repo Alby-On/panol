@@ -84,12 +84,78 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Aquí se llenarán las filas dinámicamente -->
+            <tr><td colspan="6" style="text-align:center;">Cargando historial...</td></tr>
         </tbody>
     </table>
 
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
+
+// Obtener usuario logueado
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+    window.location.href = "index.html";
+}
+
+// Cargar historial de solicitudes entregadas
+async function cargarHistorial() {
+    const tbody = document.querySelector("#historialTable tbody");
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Cargando historial...</td></tr>`;
+
+    try {
+        const res = await fetch(`${API_URL}?action=getHistorial&email=${user.email}`);
+        const json = await res.json();
+
+        if (!json.ok) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Error al cargar historial.</td></tr>`;
+            return;
+        }
+
+        const entregadas = json.solicitudes.filter(s => s.estado === "Entregado");
+
+        if (entregadas.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay solicitudes completadas.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = "";
+
+        entregadas.forEach(s => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${s.id}</td>
+                <td>${s.docente}</td>
+                <td>${s.asignatura}</td>
+                <td>${new Date(s.fecha).toLocaleString()}</td>
+                <td>${s.estado}</td>
+                <td>
+                    <button class="btnDetalle" onclick="toggleMateriales('${s.id}')">Ver</button>
+                    <div id="mat-${s.id}" class="materialesBox">
+                        ${s.materiales.map(m => `• ${m.material} — ${m.cantidad}<br>`).join('')}
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Error de conexión.</td></tr>`;
+        console.error(err);
+    }
+}
+
+// Mostrar/ocultar materiales
+function toggleMateriales(id) {
+    const box = document.getElementById(`mat-${id}`);
+    box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+// Ejecutar al cargar
+cargarHistorial();
+</script>
 
 </body>
 </html>
