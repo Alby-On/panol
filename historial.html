@@ -5,73 +5,61 @@
 <title>Historial de Solicitudes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { font-family: Arial; background: #f0f2f5; padding: 20px; margin: 0; }
-.box { background: white; padding: 20px; width: 100%; max-width: 750px; margin: auto; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.15);}
-h2 { text-align:center; }
-.solicitud { margin-bottom: 25px; padding: 15px; border-left: 5px solid #17a2b8; background: #f8f9fa; border-radius: 8px; }
-.solicitud h3 { margin: 0 0 10px 0; font-size: 18px; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { border: 1px solid #ccc; padding: 10px; font-size: 14px; }
-th { background: #17a2b8; color: white; text-align: center; }
-.btnVolver { background: #6c757d; padding: 12px; width: 100%; border: none; border-radius: 6px; color: white; font-size: 17px; cursor: pointer; margin-top: 10px; }
+body { font-family: Arial; background: #f0f2f5; padding:20px; margin:0;}
+.box { background:white; max-width:600px; margin:auto; padding:20px; margin-top:15px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,0.15);}
+h2{text-align:center;}
+.solicitud {background:#f8f9fa; padding:12px; border-left:5px solid #17a2b8; margin-bottom:12px; border-radius:8px;}
+.btnVolver {background:#6c757d; color:white; width:100%; padding:12px; border:none; border-radius:6px; font-size:17px; cursor:pointer; margin-top:15px;}
 </style>
 </head>
 <body>
+
 <div class="box">
 <h2>Historial de Solicitudes</h2>
-<div id="contenedor">Cargando historial...</div>
+<div id="listado">Cargando historial...</div>
 <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec"; // tu script
+const API_URL = "https://script.google.com/macros/library/d/1bSwCYfW82kcUZ5lTIc5O-wVUzmG6o_nAvOP7Ral7l0BgGeU9t2RAo1ww/4"; // reemplaza con tu URL del Web App
+
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if(!user) window.location.href="index.html";
+if (!user) location.href="index.html";
 
 async function cargarHistorial() {
+    const cont = document.getElementById("listado");
     try {
-        const res = await fetch(API_URL + "?action=getHistorial&email=" + user.email);
+        const res = await fetch(`${API_URL}?action=getHistorial&email=${user.email}`);
         const json = await res.json();
-        const cont = document.getElementById("contenedor");
 
-        if(!json.ok || json.data.length===0){
-            cont.innerHTML="<p>No hay solicitudes completadas.</p>";
-            return;
-        }
+        if(!json.ok) { cont.innerHTML="Error al cargar historial."; return; }
+        const lista = json.solicitudes;
+        if(lista.length===0) { cont.innerHTML="<p>No tienes solicitudes completadas.</p>"; return; }
 
-        cont.innerHTML="";
-        json.data.forEach(sol=>{
-            const html = `
-            <div class="solicitud">
-                <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
-                <p><b>Fecha:</b> ${sol.fecha}</p>
-                <p><b>Docente:</b> ${sol.docente}</p>
-                <p><b>Asignatura:</b> ${sol.asignatura}</p>
-                <table>
-                    <thead>
-                        <tr><th>Material</th><th>Cantidad</th></tr>
-                    </thead>
-                    <tbody>
-                        ${sol.materiales.map(m=>`<tr><td>${m.nombre}</td><td>${m.cantidad}</td></tr>`).join('')}
-                    </tbody>
-                </table>
-            </div>
+        cont.innerHTML = "";
+        lista.forEach(sol=>{
+            const div = document.createElement("div");
+            div.className = "solicitud";
+            div.innerHTML = `
+                <b>ID:</b> ${sol.id}<br>
+                <b>Docente:</b> ${sol.docente}<br>
+                <b>Asignatura:</b> ${sol.asignatura}<br>
+                <b>Fecha:</b> ${sol.fecha}<br>
+                <b>Estado:</b> ${sol.estado}<br>
+                <button onclick="alert('Aquí podrás ver los materiales');">Ver materiales</button>
             `;
-            cont.innerHTML+=html;
+            cont.appendChild(div);
         });
-
-    } catch(err){
-        document.getElementById("contenedor").innerHTML="<p>Error al cargar historial.</p>";
-        console.error(err);
+    } catch(err) {
+        cont.innerHTML = "Error de conexión.";
     }
 }
 
 cargarHistorial();
 </script>
+
 </body>
 </html>
 
-
-</body>
 </html>
 
