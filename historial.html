@@ -5,63 +5,103 @@
 <title>Historial de Solicitudes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body { font-family: Arial; background: #f0f2f5; padding: 20px; margin:0; }
-  .box { background:white; max-width:500px; margin:auto; padding:20px; margin-top:15px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,0.15);}
-  h2{text-align:center;}
-  .solicitud { background:#f8f9fa; padding:12px; border-radius:8px; margin-bottom:12px; border-left:5px solid #007bff;}
-  .btnVolver { background:#6c757d; padding:12px; width:100%; border:none; border-radius:6px; color:white; font-size:17px; cursor:pointer; margin-top:15px;}
+    body {
+        font-family: Arial;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+    }
+    .box {
+        background: white;
+        max-width: 750px;
+        margin: auto;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+    h2 { text-align:center; }
+
+    .solicitud {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-left: 5px solid #17a2b8;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .solicitud h3 { margin: 0 0 10px 0; font-size: 18px; }
+
+    .btnVolver {
+        background: #6c757d;
+        padding: 12px;
+        width: 100%;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 17px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .btnMateriales {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .materiales {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        background: #f1f1f1;
+        border-radius: 6px;
+    }
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h2>Historial de Solicitudes</h2>
-  <div id="listado">Cargando historial...</div>
-  <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+    <h2>Historial de Solicitudes Entregadas</h2>
+
+    <!-- Solicitud de ejemplo 1 -->
+    <div class="solicitud">
+        <h3>Solicitud #101 – <b>Entregado</b></h3>
+        <p><b>Fecha:</b> 05/11/2025 14:30</p>
+        <p><b>Docente:</b> Juan Pérez</p>
+        <p><b>Asignatura:</b> Matemáticas</p>
+        <button class="btnMateriales" onclick="document.getElementById('mat1').style.display = (document.getElementById('mat1').style.display === 'block') ? 'none' : 'block';">
+            Ver Materiales
+        </button>
+        <div id="mat1" class="materiales">
+            • Lápices — <b>10</b><br>
+            • Cuadernos — <b>5</b>
+        </div>
+    </div>
+
+    <!-- Solicitud de ejemplo 2 -->
+    <div class="solicitud">
+        <h3>Solicitud #102 – <b>Entregado</b></h3>
+        <p><b>Fecha:</b> 06/11/2025 09:15</p>
+        <p><b>Docente:</b> María López</p>
+        <p><b>Asignatura:</b> Física</p>
+        <button class="btnMateriales" onclick="document.getElementById('mat2').style.display = (document.getElementById('mat2').style.display === 'block') ? 'none' : 'block';">
+            Ver Materiales
+        </button>
+        <div id="mat2" class="materiales">
+            • Reglas — <b>3</b><br>
+            • Calculadoras — <b>2</b>
+        </div>
+    </div>
+
+    <button class="btnVolver" onclick="alert('Volviendo al menú...')">Volver</button>
 </div>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) location.href="index.html";
-
-function cargarHistorial() {
-  const script = document.createElement("script");
-  script.src = `${API_URL}?action=getHistorial&email=${user.email}&callback=mostrarHistorial`;
-  document.body.appendChild(script);
-}
-
-function mostrarHistorial(res) {
-  const cont = document.getElementById("listado");
-  if (!res.ok) {
-    cont.innerHTML = "Error al cargar historial.";
-    return;
-  }
-
-  const lista = res.solicitudes;
-  if (lista.length === 0) {
-    cont.innerHTML = "<p>No tienes solicitudes entregadas.</p>";
-    return;
-  }
-
-  cont.innerHTML = "";
-  lista.forEach(sol => {
-    const div = document.createElement("div");
-    div.className = "solicitud";
-    div.innerHTML = `
-      <b>ID:</b> ${sol.id}<br>
-      <b>Docente:</b> ${sol.docente}<br>
-      <b>Asignatura:</b> ${sol.asignatura}<br>
-      <b>Fecha:</b> ${sol.fecha}<br>
-      <b>Estado:</b> ${sol.estado}<br>
-      <button onclick="alert('Aquí se mostrarán los materiales')">Ver materiales</button>
-    `;
-    cont.appendChild(div);
-  });
-}
-
-cargarHistorial();
-</script>
+</body>
+</html>
 
 </body>
 </html>
