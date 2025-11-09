@@ -1,128 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Historial de Solicitudes</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-    body {
-        font-family: Arial;
-        background: #f0f2f5;
-        margin: 0;
-        padding: 20px;
-    }
-    .box {
-        background: white;
-        max-width: 800px;
-        margin: auto;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    }
-    h2 { text-align:center; margin-bottom: 20px; }
+    <meta charset="UTF-8">
+    <title>Historial de Solicitudes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+        h2 { text-align:center; }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-        font-size: 14px;
-    }
-    th {
-        background: #17a2b8;
-        color: white;
-        text-align: center;
-    }
-    td button {
-        background: #17a2b8;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-
-    .btnVolver {
-        background: #6c757d;
-        padding: 12px;
-        width: 100%;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        font-size: 17px;
-        cursor: pointer;
-    }
-
-    .materiales {
-        display: none;
-        margin-top: 5px;
-        padding: 8px;
-        background: #f1f1f1;
-        border-radius: 6px;
-    }
-</style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            font-size: 14px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+        .btnDetalle {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btnVolver {
+            background: #6c757d;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .materialesBox {
+            display: none;
+            background: #f7f7f7;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Historial de Solicitudes Entregadas</h2>
+    <h2>Historial de Solicitudes</h2>
 
-    <table>
+    <table id="historialTable">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Fecha</th>
                 <th>Docente</th>
                 <th>Asignatura</th>
+                <th>Fecha</th>
                 <th>Estado</th>
                 <th>Materiales</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>101</td>
-                <td>05/11/2025 14:30</td>
-                <td>Juan Pérez</td>
-                <td>Matemáticas</td>
-                <td>Entregado</td>
-                <td>
-                    <button onclick="document.getElementById('mat1').style.display = (document.getElementById('mat1').style.display === 'block') ? 'none' : 'block';">
-                        Ver
-                    </button>
-                    <div id="mat1" class="materiales">
-                        • Lápices — <b>10</b><br>
-                        • Cuadernos — <b>5</b>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>102</td>
-                <td>06/11/2025 09:15</td>
-                <td>María López</td>
-                <td>Física</td>
-                <td>Entregado</td>
-                <td>
-                    <button onclick="document.getElementById('mat2').style.display = (document.getElementById('mat2').style.display === 'block') ? 'none' : 'block';">
-                        Ver
-                    </button>
-                    <div id="mat2" class="materiales">
-                        • Reglas — <b>3</b><br>
-                        • Calculadoras — <b>2</b>
-                    </div>
-                </td>
-            </tr>
+            <!-- Aquí se llenarán las filas dinámicamente -->
         </tbody>
     </table>
 
-    <button class="btnVolver" onclick="alert('Volviendo al menú...')">Volver</button>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 </body>
 </html>
-
-
 
