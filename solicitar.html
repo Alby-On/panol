@@ -2,174 +2,185 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Solicitudes Pendientes</title>
+    <title>Solicitud de Materiales</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #f0f2f5;
-            padding: 20px;
             margin: 0;
+            padding: 20px;
         }
         .box {
             background: white;
             padding: 20px;
-            width: 100%;
             max-width: 750px;
-            margin: auto;
-            margin-top: 10px;
+            margin: 20px auto;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
-        h2 { text-align:center; }
-
-        .solicitud {
-            margin-bottom: 25px;
-            padding: 15px;
-            border-left: 5px solid #007bff;
-            background: #f8f9fa;
-            border-radius: 8px;
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 15px;
         }
-
-        .solicitud h3 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            box-sizing: border-box;
         }
-
         table {
-            width: 100%; border-collapse: collapse; margin-top: 10px;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
         th, td {
             border: 1px solid #ccc;
             padding: 10px;
-            font-size: 14px;
         }
         th {
             background: #007bff;
             color: white;
             text-align: center;
         }
-        td input[type="checkbox"] {
-            width: 20px; height: 20px; cursor: pointer;
-        }
-
-        .btnCompletar {
-            background: #28a745;
-            padding: 10px;
+        td input {
             width: 100%;
+            padding: 7px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btnAdd, .btnRemove, .btnEnviar, .btnVolver {
+            width: 100%;
+            padding: 12px;
             border: none;
             border-radius: 6px;
-            color: white;
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
         }
-        .btnCompletar:hover { background: #218838; }
-
-        .btnVolver {
-            background: #6c757d;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 17px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+        .btnAdd { background: #17a2b8; color: white; }
+        .btnRemove { background: #dc3545; color: white; }
+        .btnEnviar { background: #28a745; color: white; }
+        .btnVolver { background: #6c757d; color: white; }
+        .btnAdd:hover { background: #138496; }
+        .btnRemove:hover { background: #c82333; }
+        .btnEnviar:hover { background: #218838; }
+        .btnVolver:hover { background: #565e64; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Solicitudes Pendientes</h2>
-    <div id="contenedor"></div>
+    <h2>Solicitud de Materiales</h2>
 
+    <label>Docente a cargo:</label>
+    <select id="docente">
+        <option value="">Seleccione un docente</option>
+        <option>AARÓN EDUARDO SEPÚLVEDA MEDINA</option>
+        <option>ALEJANDRO GABRIEL MOENA VALDERRAMA</option>
+        <option>BRAYAN PATRICIO DEL VALLE AEDO</option>
+        <option>DANIELA FERNANDA MARTÍNEZ MARTÍNEZ</option>
+        <option>EDUARDO ARTURO BASTÍAS GARCÍA</option>
+        <option>ELÍAS ANDRÉS POBLETE AVILA</option>
+        <option>GERARDO NICOLÁS SEPÚLVEDA GUTIÉRREZ</option>
+        <option>GIOVANNI ANDRÉS JARA TORRES</option>
+        <option>JORGE ANDRÉS PÉREZ MILLAR</option>
+        <option>JOSEFA CATALINA LISBOA RIVERA</option>
+        <option>JULIO CESAR ALARCON MONTEROS</option>
+        <option>MANUEL ALEJANDRO HENRIQUEZ OLIVA</option>
+        <option>MARCO ANTONIO ARRIAGADA CASAS</option>
+        <option>PEDRO PATRICIO PEDRERO PÉREZ</option>
+        <option>RICHARD ANTONIO VALDERRAMA SAN MARTIN</option>
+        <option>RICHARD NICOLÁS SANTOS MARTÍNEZ</option>
+        <option>ROBERTO SEBASTIAN CID LIZAMA</option>
+        <option>RODRIGO ALEJANDRO CONTRERAS ZÚÑIGA</option>
+        <option>RODRIGO ALEJANDRO GARRIDO GARRIDO</option>
+        <option>ROLANDO EDUARDO ORTEGA FUENTES</option>
+        <option>VÍCTOR EDUARDO ZAPATA MYRIK</option>
+        <option>OTROS DOCENTES</option>
+    </select>
+
+    <label>Asignatura:</label>
+    <input type="text" id="asignatura" placeholder="Ej: Instalaciones Eléctricas II">
+
+    <h3>Materiales Solicitados</h3>
+
+    <table id="tabla">
+        <thead>
+            <tr>
+                <th>Material / Equipo</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr>
+                <td><input type="text" placeholder="Ej: Multímetro UT33C"></td>
+                <td><input type="number" min="1" value="1"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btnAdd" onclick="addRow()">➕ Agregar Material</button>
+    <button class="btnRemove" onclick="removeRow()">➖ Eliminar Último</button>
+    <button class="btnEnviar" onclick="enviar()">Enviar Solicitud</button>
     <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbz9WetM8e7cgqCwrASJERRwWTI-QcozsEflmIvnK41vOJLK0Azoo71Gx17qnDZ2-VA/exec";
 const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
-/* ----------- VALIDAR SESIÓN ----------- */
+/* ----------- VERIFICAR USUARIO LOGEADO ----------- */
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) {
-    window.location.href = "index.html";
+if (!user) window.location.href = "index.html";
+
+/* ----------- AGREGAR FILA ----------- */
+function addRow() {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td><input type="text" placeholder="Ej: Cables de prueba"></td>
+        <td><input type="number" min="1" value="1"></td>
+    `;
+    document.getElementById("tbody").appendChild(tr);
 }
 
-/* ----------- CARGAR SOLICITUDES ----------- */
-async function cargarSolicitudes() {
-    try {
-        const res = await fetch(API_URL + "?action=getSolicitudes&email=" + user.email);
-        const json = await res.json();
-
-        if (!json.ok) {
-            document.getElementById("contenedor").innerHTML = 
-                "<p>No se encontraron solicitudes pendientes.</p>";
-            return;
-        }
-
-        mostrarSolicitudes(json.data);
-
-    } catch (err) {
-        alert("Error al cargar solicitudes.");
-    }
+/* ----------- ELIMINAR ÚLTIMA FILA ----------- */
+function removeRow() {
+    const tbody = document.getElementById("tbody");
+    if (tbody.rows.length > 1) tbody.deleteRow(tbody.rows.length - 1);
+    else alert("Debe haber al menos un material.");
 }
 
-function mostrarSolicitudes(lista) {
-    const div = document.getElementById("contenedor");
-    div.innerHTML = "";
+/* ----------- ENVIAR SOLICITUD AL BACKEND ----------- */
+async function enviar() {
+    const docente = document.getElementById("docente").value;
+    const asignatura = document.getElementById("asignatura").value.trim();
 
-    lista.forEach(sol => {
-        const html = `
-        <div class="solicitud" id="sol-${sol.id}">
-            <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
-            <p><b>Fecha:</b> ${sol.fecha}</p>
-            <p><b>Docente:</b> ${sol.docente}</p>
-            <p><b>Asignatura:</b> ${sol.asignatura}</p>
+    if (!docente) { alert("Seleccione un docente."); return; }
+    if (!asignatura) { alert("Ingrese la asignatura."); return; }
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Material</th>
-                        <th>Cantidad</th>
-                        <th>Entregado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${sol.materiales.map(m => `
-                        <tr>
-                            <td>${m.nombre}</td>
-                            <td>${m.cantidad}</td>
-                            <td style="text-align:center;">
-                                <input type="checkbox" class="chk-${sol.id}">
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+    const filas = document.querySelectorAll("#tbody tr");
+    const materiales = [];
 
-            <button class="btnCompletar" onclick="completar(${sol.id})">
-                Marcar Como Completada
-            </button>
-        </div>
-        `;
-
-        div.innerHTML += html;
+    filas.forEach(f => {
+        const nombre = f.children[0].querySelector("input").value.trim();
+        const cantidad = f.children[1].querySelector("input").value.trim();
+        if (nombre && cantidad) materiales.push({ nombre, cantidad });
     });
-}
 
-/* ----------- MARCAR SOLICITUD COMO COMPLETADA ----------- */
-async function completar(id) {
-    if (!confirm("¿Confirmar que esta solicitud fue entregada?")) return;
-
-    const btn = document.querySelector(`#sol-${id} .btnCompletar`);
-    btn.disabled = true;              
-    btn.innerText = "Procesando...";  
+    if (materiales.length === 0) { alert("Debe ingresar al menos un material."); return; }
 
     const data = {
-        action: "completarSolicitud",
-        id: id
+        action: "nuevaSolicitud",
+        userEmail: user.email,
+        docente,
+        asignatura,
+        materiales
     };
 
     try {
@@ -177,31 +188,18 @@ async function completar(id) {
             method: "POST",
             body: JSON.stringify(data)
         });
-
         const json = await res.json();
+        if (!json.ok) { alert("Error: " + json.msg); return; }
 
-        if (!json.ok) {
-            alert("Error: " + json.msg);
-            btn.disabled = false;       
-            btn.innerText = "Marcar Como Completada";
-            return;
-        }
-
-        alert("✅ Solicitud marcada como completada.");
-        cargarSolicitudes(); // refrescar lista
+        alert("✅ Solicitud enviada con éxito.");
+        location.href = "menu.html";
 
     } catch (err) {
-        alert("Error de conexión.");
-        btn.disabled = false;
-        btn.innerText = "Marcar Como Completada";
+        alert("Error de conexión con el servidor.");
     }
 }
-
-/* ----------- INICIO ----------- */
-cargarSolicitudes();
 </script>
 
 </body>
 </html>
-
 
