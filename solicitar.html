@@ -133,7 +133,6 @@
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbz9WetM8e7cgqCwrASJERRwWTI-QcozsEflmIvnK41vOJLK0Azoo71Gx17qnDZ2-VA/exec";
-const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
 /* ----------- VERIFICAR USUARIO LOGEADO ----------- */
 const user = JSON.parse(localStorage.getItem("currentUser"));
@@ -157,12 +156,21 @@ function removeRow() {
 }
 
 /* ----------- ENVIAR SOLICITUD AL BACKEND ----------- */
+let enviando = false;
+
 async function enviar() {
+    if (enviando) return; // prevenir múltiples clics
+    enviando = true;
+
+    const btn = document.querySelector(".btnEnviar");
+    btn.disabled = true;
+    btn.innerText = "Enviando...";
+
     const docente = document.getElementById("docente").value;
     const asignatura = document.getElementById("asignatura").value.trim();
 
-    if (!docente) { alert("Seleccione un docente."); return; }
-    if (!asignatura) { alert("Ingrese la asignatura."); return; }
+    if (!docente) { alert("Seleccione un docente."); resetBtn(); return; }
+    if (!asignatura) { alert("Ingrese la asignatura."); resetBtn(); return; }
 
     const filas = document.querySelectorAll("#tbody tr");
     const materiales = [];
@@ -173,7 +181,7 @@ async function enviar() {
         if (nombre && cantidad) materiales.push({ nombre, cantidad });
     });
 
-    if (materiales.length === 0) { alert("Debe ingresar al menos un material."); return; }
+    if (materiales.length === 0) { alert("Debe ingresar al menos un material."); resetBtn(); return; }
 
     const data = {
         action: "nuevaSolicitud",
@@ -189,17 +197,24 @@ async function enviar() {
             body: JSON.stringify(data)
         });
         const json = await res.json();
-        if (!json.ok) { alert("Error: " + json.msg); return; }
+        if (!json.ok) { alert("Error: " + json.msg); resetBtn(); return; }
 
         alert("✅ Solicitud enviada con éxito.");
         location.href = "menu.html";
 
     } catch (err) {
         alert("Error de conexión con el servidor.");
+        resetBtn();
     }
+}
+
+function resetBtn() {
+    const btn = document.querySelector(".btnEnviar");
+    btn.disabled = false;
+    btn.innerText = "Enviar Solicitud";
+    enviando = false;
 }
 </script>
 
 </body>
 </html>
-
