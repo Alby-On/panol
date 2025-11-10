@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Historial de Solicitudes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <style>
         body {
             font-family: Arial;
@@ -11,42 +12,49 @@
             padding: 20px;
             margin: 0;
         }
+
         .box {
             background: white;
             padding: 20px;
-            width: 100%;
             max-width: 900px;
             margin: auto;
-            margin-top: 10px;
+            margin-top: 15px;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            box-shadow: 0 0 12px rgba(0,0,0,0.15);
         }
-        h2 { text-align:center; }
+
+        h2 {
+            text-align:center;
+            margin-bottom: 20px;
+        }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            font-size: 15px;
         }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 12px;
-            font-size: 14px;
-            text-align: left;
-        }
+
         th {
             background: #007bff;
-            color: white;
-            text-align: center;
+            color:white;
+            padding: 10px;
+            text-align:center;
         }
-        .btnDetalle {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
+
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align:center;
+            background: #fafafa;
         }
+
+        #mensaje {
+            padding: 10px;
+            text-align:center;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
         .btnVolver {
             background: #6c757d;
             padding: 12px;
@@ -56,21 +64,18 @@
             color: white;
             font-size: 17px;
             cursor: pointer;
-            margin-top: 15px;
-        }
-        .materialesBox {
-            display: none;
-            background: #f7f7f7;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 6px;
+            margin-top: 20px;
         }
     </style>
 </head>
+
 <body>
 
 <div class="box">
+
     <h2>Historial de Solicitudes</h2>
+
+    <div id="mensaje">Cargando historial...</div>
 
     <table id="historialTable">
         <thead>
@@ -80,11 +85,10 @@
                 <th>Asignatura</th>
                 <th>Fecha</th>
                 <th>Estado</th>
-                <th>Materiales</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td colspan="6" style="text-align:center;">Cargando historial...</td></tr>
+            <!-- Aquí se insertará la data -->
         </tbody>
     </table>
 
@@ -92,69 +96,64 @@
 </div>
 
 <script>
+
+// ✅ PON AQUÍ TU URL REAL DEL WEB APP (NO library)
 const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
-// Obtener usuario logueado
+// Usuario logeado
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) {
-    window.location.href = "index.html";
-}
+if (!user) location.href = "index.html";
 
-// Cargar historial de solicitudes entregadas
 async function cargarHistorial() {
+    const mensaje = document.getElementById("mensaje");
     const tbody = document.querySelector("#historialTable tbody");
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Cargando historial...</td></tr>`;
 
     try {
-        const res = await fetch(`${https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec}?action=getHistorial&email=${user.email}`);
-        const json = await res.json();
+        console.log("Solicitando historial...");
+        const res = await fetch(`${https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec}?action=getHistorial&email=${encodeURIComponent(user.email)}`);
+        console.log("Estado respuesta:", res.status, res.statusText);
+
+        const text = await res.text();
+        console.log("Respuesta RAW:", text);
+
+        const json = JSON.parse(text);
+        console.log("JSON:", json);
 
         if (!json.ok) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Error al cargar historial.</td></tr>`;
+            mensaje.innerHTML = "⚠️ Error al cargar historial.";
             return;
         }
 
-        const entregadas = json.solicitudes.filter(s => s.estado === "Entregado");
+        const lista = json.solicitudes;
 
-        if (entregadas.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay solicitudes completadas.</td></tr>`;
+        if (lista.length === 0) {
+            mensaje.innerHTML = "No tienes solicitudes completadas.";
             return;
         }
 
+        mensaje.style.display = "none";
         tbody.innerHTML = "";
 
-        entregadas.forEach(s => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${s.id}</td>
-                <td>${s.docente}</td>
-                <td>${s.asignatura}</td>
-                <td>${new Date(s.fecha).toLocaleString()}</td>
-                <td>${s.estado}</td>
-                <td>
-                    <button class="btnDetalle" onclick="toggleMateriales('${s.id}')">Ver</button>
-                    <div id="mat-${s.id}" class="materialesBox">
-                        ${s.materiales.map(m => `• ${m.material} — ${m.cantidad}<br>`).join('')}
-                    </div>
-                </td>
+        lista.forEach(sol => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${sol.id}</td>
+                <td>${sol.docente}</td>
+                <td>${sol.asignatura}</td>
+                <td>${sol.fecha}</td>
+                <td>${sol.estado}</td>
             `;
-            tbody.appendChild(row);
+            tbody.appendChild(tr);
         });
 
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Error de conexión.</td></tr>`;
-        console.error(err);
+        console.error("ERROR FETCH:", err);
+        mensaje.innerHTML = "❌ Error de conexión. Revisa consola.";
     }
 }
 
-// Mostrar/ocultar materiales
-function toggleMateriales(id) {
-    const box = document.getElementById(`mat-${id}`);
-    box.style.display = box.style.display === "none" ? "block" : "none";
-}
-
-// Ejecutar al cargar
 cargarHistorial();
+
 </script>
 
 </body>
