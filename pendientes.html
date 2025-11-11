@@ -102,10 +102,10 @@ if (!user) {
 /* ----------- CARGAR SOLICITUDES ----------- */
 async function cargarSolicitudes() {
     try {
-        const res = await fetch(API_URL + "?action=getSolicitudes&email=" + user.email);
+        const res = await fetch(API_URL + "?action=getSolicitudes&email=" + encodeURIComponent(user.email));
         const json = await res.json();
 
-        if (!json.ok || json.data.length === 0) {
+        if (!json.ok || !json.data || json.data.length === 0) {
             document.getElementById("contenedor").innerHTML =
                 "<p>No se encontraron solicitudes pendientes.</p>";
             return;
@@ -114,6 +114,7 @@ async function cargarSolicitudes() {
         mostrarSolicitudes(json.data);
 
     } catch (err) {
+        console.error(err);
         alert("Error al cargar solicitudes.");
     }
 }
@@ -162,8 +163,6 @@ function mostrarSolicitudes(lista) {
 
 /* ✅ ----------- VALIDAR Y COMPLETAR ----------- */
 async function completar(id) {
-
-    /* ✅ 1. VALIDAR QUE TODOS LOS CHECKBOX ESTÉN MARCADOS */
     const checks = document.querySelectorAll(`.chk-${id}`);
     const faltantes = [...checks].filter(c => !c.checked);
 
@@ -192,12 +191,16 @@ async function completar(id) {
             return;
         }
 
-        /* ✅ 2. ALERTA DE ENTREGA COMPLETA */
+        /* ✅ Mostrar alerta y recargar automáticamente */
         alert("✅ La solicitud ha sido marcada como ENTREGADA.");
-
-        cargarSolicitudes(); // refrescar lista
+        
+        // Esperar un momento para evitar solapamiento visual del alert
+        setTimeout(() => {
+            cargarSolicitudes();
+        }, 300);
 
     } catch (err) {
+        console.error(err);
         alert("Error de conexión.");
     }
 }
@@ -208,3 +211,4 @@ cargarSolicitudes();
 
 </body>
 </html>
+
