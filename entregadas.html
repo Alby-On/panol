@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitudes Entregadas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+        h2 { text-align:center; }
+
+        .solicitud {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid #28a745; /* Verde entrega */
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .solicitud h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+        }
+        th {
+            background: #28a745;
+            color: white;
+            text-align: center;
+        }
+
+        .btnVolver {
+            background: #6c757d;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Solicitudes Entregadas</h2>
+    <div id="contenedor"></div>
+
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+</div>
+
+<script>
+/* ✅ Tu Web App */
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
+
+/* ----------- VALIDAR SESIÓN ----------- */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+    window.location.href = "index.html";
+}
+
+/* ----------- CARGAR SOLICITUDES ENTREGADAS ----------- */
+async function cargarEntregadas() {
+    try {
+        const res = await fetch(API_URL + "?action=getEntregadas&email=" + encodeURIComponent(user.email));
+        const json = await res.json();
+
+        if (!json.ok || !json.data || json.data.length === 0) {
+            document.getElementById("contenedor").innerHTML =
+                "<p>No se encontraron solicitudes entregadas.</p>";
+            return;
+        }
+
+        mostrarSolicitudes(json.data);
+
+    } catch (err) {
+        console.error(err);
+        alert("Error al cargar solicitudes.");
+    }
+}
+
+function mostrarSolicitudes(lista) {
+    const div = document.getElementById("contenedor");
+    div.innerHTML = "";
+
+    lista.forEach(sol => {
+        const html = `
+        <div class="solicitud" id="sol-${sol.id}">
+            <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
+            <p><b>Fecha:</b> ${sol.fecha}</p>
+            <p><b>Docente:</b> ${sol.docente}</p>
+            <p><b>Asignatura:</b> ${sol.asignatura}</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sol.materiales.map(m => `
+                        <tr>
+                            <td>${m.nombre}</td>
+                            <td>${m.cantidad}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        `;
+        div.innerHTML += html;
+    });
+}
+
+/* ----------- INICIO ----------- */
+cargarEntregadas();
+</script>
+
+</body>
+</html>
