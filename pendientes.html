@@ -4,189 +4,207 @@
     <meta charset="UTF-8">
     <title>Solicitudes Pendientes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             background: #f0f2f5;
-            margin: 0;
             padding: 20px;
+            margin: 0;
         }
-
         .box {
             background: white;
             padding: 20px;
-            max-width: 900px;
-            margin: 20px auto;
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+            margin-top: 10px;
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0,0,0,0.15);
         }
+        h2 { text-align:center; }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
+        .solicitud {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid #007bff;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .solicitud h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
         }
 
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+            width: 100%; border-collapse: collapse; margin-top: 10px;
         }
-
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+        }
         th {
             background: #007bff;
             color: white;
+            text-align: center;
+        }
+        td input[type="checkbox"] {
+            width: 20px; height: 20px; cursor: pointer;
+        }
+
+        .btnCompletar {
+            background: #28a745;
             padding: 10px;
-        }
-
-        td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            vertical-align: top;
-        }
-
-        .item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .item input {
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px 14px;
-            cursor: pointer;
+            width: 100%;
             border: none;
             border-radius: 6px;
-            background: #28a745;
             color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
         }
+        .btnCompletar:hover { background: #218838; }
 
-        button:hover {
-            background: #218838;
+        .btnVolver {
+            background: #6c757d;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
-
 <body>
 
 <div class="box">
     <h2>Solicitudes Pendientes</h2>
+    <div id="contenedor"></div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Docente</th>
-                <th>Asignatura</th>
-                <th>Materiales</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-    </table>
-
-    <button style="background:#6c757d; margin-top:15px;" onclick="location.href='menu.html'">
-        Volver
-    </button>
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz9WetM8e7cgqCwrASJERRwWTI-QcozsEflmIvnK41vOJLK0Azoo71Gx17qnDZ2-VA/exec";
+/* ✅ TU WEB APP URL */
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
 
-/* ----------- VERIFICAR SESIÓN ----------- */
+/* ----------- VALIDAR SESIÓN ----------- */
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) window.location.href = "index.html";
-
-/* ----------- RENDERIZAR MATERIALES ----------- */
-function renderMateriales(materiales, solicitudId) {
-    return materiales.map((m, i) => `
-        <div class="item">
-            <input type="checkbox" class="chk-material" data-solicitud="${solicitudId}">
-            <label>${m.nombre} — <strong>${m.cantidad}</strong></label>
-        </div>
-    `).join("");
+if (!user) {
+    window.location.href = "index.html";
 }
 
-/* ----------- CARGAR PENDIENTES ----------- */
-async function cargarPendientes() {
+/* ----------- CARGAR SOLICITUDES ----------- */
+async function cargarSolicitudes() {
     try {
-        const res = await fetch(API_URL + "?action=getPendientes");
+        const res = await fetch(API_URL + "?action=getSolicitudes&email=" + user.email);
         const json = await res.json();
 
-        if (!json.ok) {
-            alert("Error al cargar pendientes");
+        if (!json.ok || json.data.length === 0) {
+            document.getElementById("contenedor").innerHTML =
+                "<p>No se encontraron solicitudes pendientes.</p>";
             return;
         }
 
-        const tbody = document.getElementById("tbody");
-        tbody.innerHTML = "";
+        mostrarSolicitudes(json.data);
 
-        json.data.forEach(s => {
-            const tr = document.createElement("tr");
-            tr.id = `solicitud-${s.id}`;
-
-            tr.innerHTML = `
-                <td>${s.docente}</td>
-                <td>${s.asignatura}</td>
-                <td>${renderMateriales(s.materiales, s.id)}</td>
-                <td>
-                    <button onclick="confirmarEntrega(${s.id})">Confirmar</button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-
-    } catch (e) {
-        alert("Error de conexión con el servidor");
+    } catch (err) {
+        alert("Error al cargar solicitudes.");
     }
 }
 
-/* ----------- CONFIRMAR ENTREGA ----------- */
-async function confirmarEntrega(id) {
+function mostrarSolicitudes(lista) {
+    const div = document.getElementById("contenedor");
+    div.innerHTML = "";
 
-    const contenedor = document.querySelector(`#solicitud-${id}`);
-    const checks = contenedor.querySelectorAll(".chk-material");
+    lista.forEach(sol => {
+        const html = `
+        <div class="solicitud" id="sol-${sol.id}">
+            <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
+            <p><b>Fecha:</b> ${sol.fecha}</p>
+            <p><b>Docente:</b> ${sol.docente}</p>
+            <p><b>Asignatura:</b> ${sol.asignatura}</p>
 
-    for (const chk of checks) {
-        if (!chk.checked) {
-            alert("⚠ Debes marcar todos los materiales antes de confirmar la entrega.");
-            return;
-        }
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Cantidad</th>
+                        <th>Entregado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sol.materiales.map(m => `
+                        <tr>
+                            <td>${m.nombre}</td>
+                            <td>${m.cantidad}</td>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="chk-${sol.id}">
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+
+            <button class="btnCompletar" onclick="completar(${sol.id})">
+                Marcar Como Completada
+            </button>
+        </div>
+        `;
+        div.innerHTML += html;
+    });
+}
+
+/* ✅ ----------- VALIDAR Y COMPLETAR ----------- */
+async function completar(id) {
+
+    /* ✅ 1. VALIDAR QUE TODOS LOS CHECKBOX ESTÉN MARCADOS */
+    const checks = document.querySelectorAll(`.chk-${id}`);
+    const faltantes = [...checks].filter(c => !c.checked);
+
+    if (faltantes.length > 0) {
+        alert("⚠ Debes marcar TODOS los materiales como entregados.");
+        return;
     }
 
-    const confirmar = confirm("¿Confirmar entrega de TODOS los materiales?");
-    if (!confirmar) return;
+    if (!confirm("¿Confirmar que esta solicitud fue entregada?")) return;
+
+    const data = {
+        action: "completarSolicitud",
+        id: id
+    };
 
     try {
-        const response = await fetch(API_URL, {
+        const res = await fetch(API_URL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "confirmarEntrega",
-                id: id
-            })
+            body: JSON.stringify(data)
         });
 
-        const json = await response.json();
+        const json = await res.json();
 
         if (!json.ok) {
             alert("Error: " + json.msg);
             return;
         }
 
-        alert("✅ Entrega confirmada con éxito");
-        cargarPendientes();
+        /* ✅ 2. ALERTA DE ENTREGA COMPLETA */
+        alert("✅ La solicitud ha sido marcada como ENTREGADA.");
 
-    } catch (e) {
-        alert("❌ Error de conexión con el servidor");
+        cargarSolicitudes(); // refrescar lista
+
+    } catch (err) {
+        alert("Error de conexión.");
     }
 }
 
-cargarPendientes();
+/* ----------- INICIO ----------- */
+cargarSolicitudes();
 </script>
 
 </body>
 </html>
-
