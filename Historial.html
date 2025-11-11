@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Solicitudes</title>
+    <!-- Carga de Tailwind CSS para un diseño limpio y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos generales y fuente */
+        body { font-family: 'Inter', sans-serif; }
+        .container { max-width: 1000px; }
+        h2 { 
+            border-bottom: 3px solid #007bff; 
+            padding-bottom: 10px; 
+        }
+        
+        /* Estilos de la tabla y filas */
+        .solicitud-row:hover { background-color: #f8f9fa; }
+        .detalle-row { background-color: #fcfcfc; border-bottom: 2px solid #e9ecef; }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-Entregada { background-color: #d1fae5; color: #065f46; } /* green-100/900 */
+        .status-Parcial { background-color: #fef3c7; color: #b45309; } /* yellow-100/800 */
+        .status-No_Entregada { background-color: #fee2e2; color: #991b1b; } /* red-100/900 */
+
+        /* Botón de toggle/acordeón */
+        .btn-toggle {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .btn-toggle:hover { background-color: #4338ca; } /* indigo-700 */
+
+        /* Estilo de la lista de ítems para re-solicitud */
+        .item-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+        }
+        .material-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .material-item:last-child { border-bottom: none; }
+        .material-item input[type="checkbox"] {
+            transform: scale(1.3);
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .material-info { flex-grow: 1; }
+        .material-info strong { display: block; }
+        .material-info span { font-size: 0.8rem; color: #6b7280; }
+        
+        /* Contenedor del Botón de Re-solicitud */
+        .reorder-action-area {
+            padding-top: 15px;
+            border-top: 2px solid #e5e7eb;
+            margin-top: 15px;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-8">
+
+<div class="container mx-auto mt-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-4 sm:mb-0">
+            📚 Historial de Solicitudes de Materiales
+        </h2>
+        <a href="menu.html" class="text-blue-600 hover:text-blue-800 font-semibold transition duration-150 py-2 px-4 rounded-lg bg-white shadow-md">
+            ← Volver al Menú
+        </a>
+    </div>
+
+    <div class="overflow-x-auto shadow-lg rounded-xl">
+        <table class="min-w-full bg-white rounded-xl">
+            <thead>
+                <tr class="text-sm uppercase tracking-wider bg-gray-100">
+                    <th class="py-3 px-4 font-bold text-gray-600 rounded-tl-xl">ID</th>
+                    <th class="py-3 px-4 font-bold text-gray-600">Docente / Asignatura</th>
+                    <th class="py-3 px-4 font-bold text-gray-600">Fecha Solicitud</th>
+                    <th class="py-3 px-4 font-bold text-gray-600">Estado</th>
+                    <th class="py-3 px-4 font-bold text-gray-600 rounded-tr-xl">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="historialBody">
+                <!-- Las solicitudes históricas se cargarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <p id="emptyMessage" class="mt-8 text-center text-gray-500 hidden">
+        No hay solicitudes registradas en el historial.
+    </p>
+</div>
+
+
+<script>
+    // Datos simulados de solicitudes históricas
+    const historialSolicitudes = [
+        {
+            id: 'SOL-010',
+            docente: 'ALEJANDRO GABRIEL MOENA VALDERRAMA',
+            asignatura: 'Programación Avanzada',
+            fechaSolicitud: '2025-09-01',
+            fechaEntrega: '2025-09-03',
+            status: 'Entregada', // Completed delivery
+            items: [
+                { material: 'Placa Arduino UNO R3', cantidad: 10, entregado: 10 },
+                { material: 'Cables Dupont Macho-Macho (Pack 40)', cantidad: 5, entregado: 5 },
+                { material: 'Protoboard 830 puntos', cantidad: 10, entregado: 10 }
+            ]
+        },
+        {
+            id: 'SOL-011',
+            docente: 'DANIELA FERNANDA MARTÍNEZ MARTÍNEZ',
+            asignatura: 'Circuitos Digitales',
+            fechaSolicitud: '2025-09-15',
+            fechaEntrega: '2025-09-17',
+            status: 'Parcial', // Partial delivery (with a motive)
+            motivoParcial: 'Faltan 2 Protoboards por estar en mantención, se entregó el resto.',
+            items: [
+                { material: 'Protoboard 830 puntos', cantidad: 10, entregado: 8 },
+                { material: 'Multímetro Digital', cantidad: 5, entregado: 5 }
+            ]
+        },
+        {
+            id: 'SOL-012',
+            docente: 'JORGE ANDRÉS PÉREZ MILLAR',
+            asignatura: 'Sistemas Operativos',
+            fechaSolicitud: '2025-10-01',
+            fechaEntrega: '2025-10-02',
+            status: 'Entregada',
+            items: [
+                { material: 'Pendrive 64GB', cantidad: 20, entregado: 20 },
+            ]
+        }
+    ];
+
+    /**
+     * Mapeo de estados para aplicar estilos de badge.
+     */
+    function getStatusBadge(status) {
+        let text = status.replace('_', ' ');
+        let className = status.replace(' ', '_'); // Entregada, Parcial, No_Entregada
+        
+        return `<span class="status-badge status-${className}">${text}</span>`;
+    }
+
+
+    /**
+     * Carga las solicitudes históricas en la tabla principal con estructura de acordeón.
+     */
+    function cargarHistorial() {
+        const tbody = document.getElementById('historialBody');
+        tbody.innerHTML = '';
+
+        if (historialSolicitudes.length === 0) {
+            document.getElementById('emptyMessage').classList.remove('hidden');
+            return;
+        } else {
+            document.getElementById('emptyMessage').classList.add('hidden');
+        }
+
+        historialSolicitudes.forEach(solicitud => {
+            // 1. Fila principal (Visible)
+            let mainRow = tbody.insertRow();
+            mainRow.className = 'solicitud-row border-b';
+            mainRow.innerHTML = `
+                <td class="py-4 px-4 font-semibold text-gray-700">${solicitud.id}</td>
+                <td class="py-4 px-4">
+                    <span class="font-medium block text-gray-800">${solicitud.docente}</span>
+                    <span class="text-sm text-gray-500">${solicitud.asignatura}</span>
+                </td>
+                <td class="py-4 px-4 text-sm text-gray-600">${solicitud.fechaSolicitud}</td>
+                <td class="py-4 px-4">${getStatusBadge(solicitud.status)}</td>
+                <td class="py-4 px-4">
+                    <button class="btn-toggle" onclick="toggleDetalle('${solicitud.id}')">
+                        Detalle / Re-solicitar ▼
+                    </button>
+                </td>
+            `;
+
+            // 2. Fila de detalle (Inicialmente oculta - Acordeón)
+            let detailRow = tbody.insertRow();
+            detailRow.id = `detalle-${solicitud.id}`;
+            detailRow.className = 'detalle-row hidden';
+            
+            const detailCell = detailRow.insertCell(0);
+            detailCell.colSpan = 5;
+            detailCell.className = 'p-6';
+
+            // Generar la lista de ítems con checkboxes (para re-solicitar)
+            const itemsHTML = solicitud.items.map((item, index) => `
+                <div class="material-item">
+                    <input type="checkbox" id="reorder-check-${solicitud.id}-${index}" 
+                           class="reorder-checkbox" 
+                           data-solicitud-id="${solicitud.id}" 
+                           data-material-name="${item.material}"
+                           data-material-qty="${item.cantidad}">
+                    <label for="reorder-check-${solicitud.id}-${index}" class="material-info cursor-pointer">
+                        <strong>${item.material}</strong>
+                        <span>Solicitado: x${item.cantidad} | Entregado: x${item.entregado}</span>
+                    </label>
+                </div>
+            `).join('');
+            
+            // Mensaje de motivo parcial si aplica
+            const motiveHTML = solicitud.motivoParcial 
+                ? `<div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm font-medium">
+                    <strong class="block mb-1">Motivo de Entrega Parcial:</strong>
+                    ${solicitud.motivoParcial}
+                   </div>`
+                : '';
+
+            detailCell.innerHTML = `
+                <h4 class="text-xl font-semibold mb-4 text-gray-700">Detalle de Solicitud #${solicitud.id}</h4>
+                ${motiveHTML}
+                
+                <h5 class="text-lg font-semibold mb-3 text-blue-700">Selecciona Materiales para Re-solicitar:</h5>
+                <div id="itemsList-${solicitud.id}" class="item-list-container mb-4">
+                    ${itemsHTML}
+                </div>
+                
+                <!-- Botón de Re-solicitar -->
+                <div class="reorder-action-area">
+                    <button 
+                        class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200" 
+                        onclick="prepareReorder('${solicitud.id}')"
+                    >
+                        🔄 Re-solicitar Materiales Seleccionados
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    /**
+     * Muestra u oculta la fila de detalle (efecto acordeón).
+     * @param {string} id - ID de la solicitud.
+     */
+    function toggleDetalle(id) {
+        const detailElement = document.getElementById(`detalle-${id}`);
+        const button = document.querySelector(`.btn-toggle[onclick="toggleDetalle('${id}')"]`);
+        
+        if (detailElement.classList.contains('hidden')) {
+            // Ocultar cualquier otra fila abierta
+            document.querySelectorAll('.detalle-row').forEach(row => row.classList.add('hidden'));
+            document.querySelectorAll('.btn-toggle').forEach(btn => btn.innerHTML = 'Detalle / Re-solicitar ▼');
+
+            // Mostrar la fila actual
+            detailElement.classList.remove('hidden');
+            button.innerHTML = 'Detalle / Re-solicitar ▲';
+        } else {
+            detailElement.classList.add('hidden');
+            button.innerHTML = 'Detalle / Re-solicitar ▼';
+        }
+    }
+
+    /**
+     * Prepara y simula la re-solicitud de los ítems seleccionados.
+     * @param {string} id - ID de la solicitud de origen.
+     */
+    function prepareReorder(id) {
+        const detalleRow = document.getElementById(`detalle-${id}`);
+        const checkboxes = detalleRow.querySelectorAll('.reorder-checkbox:checked');
+        const itemsToReorder = [];
+        
+        if (checkboxes.length === 0) {
+            alert('🚫 Por favor, selecciona al menos un material que deseas re-solicitar.');
+            return;
+        }
+
+        checkboxes.forEach(checkbox => {
+            itemsToReorder.push({
+                material: checkbox.getAttribute('data-material-name'),
+                cantidad: parseInt(checkbox.getAttribute('data-material-qty'), 10)
+            });
+        });
+        
+        // --- SIMULACIÓN DE RE-SOLICITUD ---
+        console.log(`Intentando re-solicitar ${itemsToReorder.length} ítems de SOLICITUD N° ${id}.`);
+        console.log('Materiales re-solicitados:', itemsToReorder);
+        
+        let mensaje = `✅ Re-solicitud generada con éxito:\n\n` +
+                      `Basada en SOLICITUD N° ${id}.\n` +
+                      `Ítems a solicitar nuevamente:\n`;
+        
+        itemsToReorder.forEach(item => {
+            mensaje += `  - ${item.material} (x${item.cantidad})\n`;
+        });
+        
+        mensaje += `\n[En un sistema real, estos ítems se precargarían en el formulario 'solicitar.html' o se enviarían directamente al proceso de aprobación.]`;
+
+        alert(mensaje);
+        
+        // Simulación: Desmarcar los checkboxes para nueva selección.
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+    }
+
+    // Cargar los datos al iniciar
+    window.onload = cargarHistorial;
+</script>
+</body>
+</html>
