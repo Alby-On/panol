@@ -1,77 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Historial de Solicitudes Entregadas</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background: #f4f6f8;
-    }
-    h2 {
-      color: #333;
-    }
-    .solicitud {
-      background: #fff;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .solicitud h3 {
-      margin: 0;
-      color: #0077cc;
-    }
-    .material {
-      margin-left: 20px;
-    }
-    .loading {
-      color: #666;
-      font-style: italic;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Solicitudes Entregadas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+        h2 { text-align:center; }
+
+        .solicitud {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid #28a745;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .solicitud h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+        }
+        th {
+            background: #28a745;
+            color: white;
+            text-align: center;
+        }
+
+        .btnVolver {
+            background: #6c757d;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btnVolver:hover {
+            background: #5a6268;
+        }
+    </style>
 </head>
 <body>
-  <h2>Historial de Solicitudes Entregadas</h2>
-  <div id="contenedor">
-    <p class="loading">Cargando historial...</p>
-  </div>
 
-  <script>
-    function cargarHistorial() {
-      google.script.run.withSuccessHandler(mostrarHistorial).obtenerHistorialEntregado();
+<div class="box">
+    <h2>Solicitudes Entregadas</h2>
+    <div id="contenedor">
+        <p>Cargando historial...</p>
+    </div>
+
+    <button class="btnVolver" onclick="location.href='menu.html'">Volver</button>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxKBcwZNWU2HpqhO40VxW1r3BQtdv9i3vF4sDQT4Luh1RINjCysBv4i0v6crhMSIJsc/exec";
+
+/* ----------- VALIDAR SESIÓN ----------- */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+    window.location.href = "index.html";
+}
+
+/* ----------- CARGAR HISTORIAL DE ENTREGADAS ----------- */
+async function cargarHistorial() {
+    try {
+        const res = await fetch(API_URL + "?action=getEntregadas&email=" + encodeURIComponent(user.email));
+        const json = await res.json();
+
+        if (!json.ok || !json.data || json.data.length === 0) {
+            document.getElementById("contenedor").innerHTML = "<p>No se encontraron solicitudes entregadas.</p>";
+            return;
+        }
+
+        mostrarHistorial(json.data);
+    } catch (err) {
+        console.error(err);
+        alert("Error al cargar historial.");
     }
+}
 
-    function mostrarHistorial(historial) {
-      const cont = document.getElementById("contenedor");
-      cont.innerHTML = "";
+/* ----------- MOSTRAR HISTORIAL ----------- */
+function mostrarHistorial(lista) {
+    const div = document.getElementById("contenedor");
+    div.innerHTML = "";
 
-      if (historial.length === 0) {
-        cont.innerHTML = "<p>No hay solicitudes entregadas.</p>";
-        return;
-      }
+    lista.forEach(sol => {
+        const html = `
+        <div class="solicitud" id="sol-${sol.id}">
+            <h3>Solicitud #${sol.id} – <b>${sol.estado}</b></h3>
+            <p><b>Fecha:</b> ${sol.fecha}</p>
+            <p><b>Usuario:</b> ${sol.usuario}</p>
+            <p><b>Tipo:</b> ${sol.tipo}</p>
 
-      historial.forEach(s => {
-        const div = document.createElement("div");
-        div.className = "solicitud";
-        div.innerHTML = `
-          <h3>Solicitud ID: ${s.id}</h3>
-          <p><strong>Fecha:</strong> ${s.fecha}</p>
-          <p><strong>Usuario:</strong> ${s.usuario}</p>
-          <p><strong>Tipo Usuario:</strong> ${s.tipo}</p>
-          <p><strong>Estado:</strong> ${s.estado}</p>
-          <p><strong>Materiales Solicitados:</strong></p>
-          <ul class="material">
-            ${s.materiales.map(m => `<li>${m.nombre} — ${m.cantidad}</li>`).join("")}
-          </ul>
-        `;
-        cont.appendChild(div);
-      });
-    }
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sol.materiales.map(m => `
+                        <tr>
+                            <td>${m.nombre}</td>
+                            <td>${m.cantidad}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>`;
+        div.innerHTML += html;
+    });
+}
 
-    window.onload = cargarHistorial;
-  </script>
+/* ----------- INICIO ----------- */
+cargarHistorial();
+</script>
+
 </body>
 </html>
+
 
